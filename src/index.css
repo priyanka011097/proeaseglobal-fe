@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Belleza&family=Outfit:wght@100..900&family=Prata&family=Cormorant+Garamond:wght@400;500;600;700&family=Great+Vibes&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+a.active hr{
+    display: block;
+}
+
+*{
+    font-family: 'Belleza', 'Helvetica Neue', Arial, sans-serif;
+}
+
+body {
+    font-family: 'Belleza', 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--page-bg, #FFF6F2);
+    color: var(--page-text, #2B2B2B);
+}
+
+.prata-regular {
+    font-family: "Prata", serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+/* Hide scrollbars (used on the horizontal product carousels too) */
+::-webkit-scrollbar{
+    display: none;
+}
+.no-scrollbar::-webkit-scrollbar{
+    display: none;
+}
+.no-scrollbar{
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Ornamental section heading: a serif title flanked by thin rules with a
+   small diamond flourish, echoing the boxed titles in the reference design. */
+.ornament-heading {
+    font-family: "Cormorant Garamond", serif;
+    letter-spacing: 0.18em;
+}
+
+@media (max-width:640px) {
+    a.active{
+        background-color: #7B1530;
+        color: white;
+    }
+}
