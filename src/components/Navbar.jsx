@@ -108,9 +108,19 @@ const Navbar = () => {
           ))}
           {/* Account / login + cart */}
           <div className='flex items-center gap-4 ml-2'>
-            <button onClick={() => navigate(token ? '/orders' : '/login')} className='text-ink hover:text-[#4CAF2E] transition' aria-label={token ? 'My account' : 'Login'}>
-              <svg width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8'><circle cx='12' cy='8' r='4' /><path d='M4 21c0-4 4-6 8-6s8 2 8 6' strokeLinecap='round' /></svg>
-            </button>
+            <div className='group relative'>
+              <button onClick={() => { if (!token) navigate('/login') }} className='text-ink hover:text-[#4CAF2E] transition flex' aria-label={token ? 'My account' : 'Login'}>
+                <svg width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8'><circle cx='12' cy='8' r='4' /><path d='M4 21c0-4 4-6 8-6s8 2 8 6' strokeLinecap='round' /></svg>
+              </button>
+              {token && (
+                <div className='group-hover:block hidden absolute right-0 pt-3 z-50'>
+                  <div className='flex flex-col gap-1 w-36 py-3 px-4 bg-white shadow-lg rounded border border-[#efe4d3] text-sm text-ink/80'>
+                    <p onClick={() => navigate('/orders')} className='cursor-pointer hover:text-[#4CAF2E]'>My Orders</p>
+                    <p onClick={logout} className='cursor-pointer hover:text-[#4CAF2E]'>Logout</p>
+                  </div>
+                </div>
+              )}
+            </div>
             <Link to='/cart' className='relative text-ink hover:text-[#4CAF2E] transition' aria-label='Cart'>
               <svg width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8'><circle cx='9' cy='20' r='1.6' /><circle cx='18' cy='20' r='1.6' /><path d='M2 3h3l2.2 12h11l2-8H6' strokeLinecap='round' strokeLinejoin='round' /></svg>
               {getCartCount() > 0 && (
