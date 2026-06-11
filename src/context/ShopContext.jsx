@@ -9,7 +9,9 @@ const ShopContextProvider = (props) => {
 
     const currency = '₹ ';
     const delivery_fee = 50;
-    const backendUrl = import.meta.env.VITE_BACKEND_URL
+    // Strip any trailing slash so `${backendUrl}/api/...` never produces a
+    // double slash (which Vercel 308-redirects and breaks CORS).
+    const backendUrl = (import.meta.env.VITE_BACKEND_URL || '').replace(/\/+$/, '')
     const [search, setSearch] = useState('');
     const [showSearch, setShowSearch] = useState(false);
     const [cartItems, setCartItems] = useState({});
