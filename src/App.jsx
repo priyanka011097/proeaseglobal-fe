@@ -6,6 +6,7 @@ import About from './pages/About'
 import Contact from './pages/Contact'
 import Faq from './pages/Faq'
 import BulkOrder from './pages/BulkOrder'
+import LegalPage from './components/LegalPage'
 import Product from './pages/Product'
 import Cart from './pages/Cart'
 import Login from './pages/Login'
@@ -36,6 +37,8 @@ const App = () => {
           <Route path='/contact' element={<Contact />} />
         <Route path='/faq' element={<Faq />} />
         <Route path='/bulk-order' element={<BulkOrder />} />
+        <Route path='/privacy' element={<LegalPage section='privacy' fallbackTitle='Privacy Policy' />} />
+        <Route path='/terms' element={<LegalPage section='terms' fallbackTitle='Terms & Conditions' />} />
           <Route path='/product/:productId' element={<Product />} />
           <Route path='/cart' element={<Cart />} />
           <Route path='/login' element={<Login />} />
