@@ -35,7 +35,8 @@ const fallback = {
 
 const TrustBadges = () => {
   const { backendUrl } = useContext(ShopContext)
-  const [trust, setTrust] = useState(fallback)
+  // Start empty so nothing renders until the real data is fetched (no flash).
+  const [trust, setTrust] = useState(null)
 
   useEffect(() => {
     const fetchTrust = async () => {
@@ -49,9 +50,10 @@ const TrustBadges = () => {
     fetchTrust()
   }, [backendUrl])
 
-  if (trust.active === false) return null
+  if (!trust || trust.active === false) return null
 
-  const items = trust.items && trust.items.length > 0 ? trust.items : fallback.items
+  const items = trust.items && trust.items.length > 0 ? trust.items : []
+  if (items.length === 0) return null
 
   return (
     <section className='bg-white border-y border-cream w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] relative'>

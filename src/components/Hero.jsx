@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '../context/ShopContext'
-import { assets } from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
@@ -21,18 +20,8 @@ const Hero = () => {
 
   useEffect(() => { fetchBanners() }, [])
 
-  // Fallback to a styled default banner when none are configured.
-  const slides = banners.length > 0
-    ? banners
-    : [{
-        _id: 'default',
-        desktopImage: assets.hero_img,
-        mobileImage: assets.hero_img,
-        heading: 'The Wedding Season',
-        subText: 'Celebrate Love in Regal Ethnic wear crafted with Modern Elegance',
-        offer: 'Upto 50% Off',
-        link: '/collection',
-      }]
+  // Only show banners the admin has actually added — no demo fallback.
+  const slides = banners
 
   useEffect(() => {
     if (slides.length <= 1) return
@@ -41,6 +30,9 @@ const Hero = () => {
   }, [slides.length])
 
   useEffect(() => { if (current >= slides.length) setCurrent(0) }, [slides.length, current])
+
+  // Nothing configured → render nothing.
+  if (slides.length === 0) return null
 
   const slide = slides[current]
   const next = () => setCurrent((p) => (p + 1) % slides.length)
@@ -53,26 +45,29 @@ const Hero = () => {
 
   return (
     <section className='relative overflow-hidden w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]'>
-      <div className={`relative h-[280px] sm:h-[440px] lg:h-[520px] ${slide.link ? 'cursor-pointer' : ''}`} onClick={goToLink}>
-        {/* Responsive artwork: mobile image on small screens, desktop otherwise */}
-        <img src={mobileSrc} alt='' className='sm:hidden absolute inset-0 w-full h-full object-cover' />
-        <img src={desktopSrc} alt='' className='hidden sm:block absolute inset-0 w-full h-full object-cover' />
+      <div className={`relative ${slide.link ? 'cursor-pointer' : ''}`} onClick={goToLink}>
+        {/* Full banner, uncropped, but capped to a shorter height. Mobile image
+            on small screens, desktop image otherwise. */}
+        <img src={mobileSrc} alt='' className='sm:hidden block w-full h-auto' />
+        <img src={desktopSrc} alt='' className='hidden sm:block w-full h-auto' />
 
         {/* Overlay only when the admin provided text (designed banners can omit it) */}
         {hasText && (
           <>
             <div className='absolute inset-0 bg-gradient-to-r from-cream/95 via-cream/40 to-transparent' />
-            <div className='relative h-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 flex items-center'>
-              <div className='max-w-md text-maroon'>
-                {slide.heading && <h1 className='font-serif text-4xl sm:text-5xl lg:text-6xl leading-tight'>{slide.heading}</h1>}
-                {slide.subText && <p className='mt-3 text-sm sm:text-base text-ink/70 max-w-sm'>{slide.subText}</p>}
-                {slide.offer && <p className='mt-4 font-serif text-3xl sm:text-4xl text-maroon'>{slide.offer}</p>}
-                <button
-                  onClick={(e) => { e.stopPropagation(); navigate(slide.link || '/collection') }}
-                  className='mt-5 inline-block bg-maroon text-white text-sm tracking-widest uppercase px-7 py-3 hover:bg-maroon-dark transition'
-                >
-                  Shop Now
-                </button>
+            <div className='absolute inset-0 flex items-center'>
+              <div className='max-w-[1280px] w-full mx-auto px-4 sm:px-6 lg:px-10'>
+                <div className='max-w-md text-maroon'>
+                  {slide.heading && <h1 className='font-serif text-3xl sm:text-5xl lg:text-6xl leading-tight'>{slide.heading}</h1>}
+                  {slide.subText && <p className='mt-3 text-sm sm:text-base text-ink/70 max-w-sm'>{slide.subText}</p>}
+                  {slide.offer && <p className='mt-4 font-serif text-2xl sm:text-4xl text-maroon'>{slide.offer}</p>}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); navigate(slide.link || '/collection') }}
+                    className='mt-5 inline-block bg-maroon text-white text-sm tracking-widest uppercase px-7 py-3 hover:bg-maroon-dark transition'
+                  >
+                    Shop Now
+                  </button>
+                </div>
               </div>
             </div>
           </>

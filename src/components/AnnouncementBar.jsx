@@ -17,8 +17,6 @@ const AnnouncementBar = () => {
           const s = res.data.settings
           const text = s.announcementText || ''
           setData({ text, active: s.announcementActive === true, link: s.announcementLink || '' })
-          // Re-show when the message changes (dismissal is keyed to the text).
-          if (sessionStorage.getItem('annDismissed') === text && text) setDismissed(true)
         }
       } catch (error) {
         console.log(error)
@@ -29,9 +27,9 @@ const AnnouncementBar = () => {
 
   if (!data.active || !data.text || dismissed) return null
 
+  // Dismiss only for the current view; it returns on the next page load.
   const close = (e) => {
     e.stopPropagation()
-    sessionStorage.setItem('annDismissed', data.text)
     setDismissed(true)
   }
 

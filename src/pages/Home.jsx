@@ -6,17 +6,7 @@ import TrustBadges from '../components/TrustBadges'
 import OfferBanner from '../components/OfferBanner'
 import CategoryCircles from '../components/CategoryCircles'
 import SectionHeading from '../components/SectionHeading'
-import PromoBanner from '../components/PromoBanner'
 import ProductCarousel from '../components/ProductCarousel'
-import { demoRows, demoRecommended } from '../assets/demo'
-
-// Promo copy paired with each demo section (used only when the catalog is empty).
-const promos = {
-  Sarees: { title: 'Classic Allure', subtitle: 'Reinventing Tradition One Saree at a Time', align: 'right' },
-  Kurtis: { title: 'Comfort Meets Style', subtitle: 'Your go-to Kurti for every Occasion', align: 'left' },
-  'Salwar Kameez': { title: 'Grace Redefined', subtitle: 'A Salwar made for Timeless Appeal', align: 'right' },
-  Lehenga: { title: 'Royal Radiance', subtitle: 'Luxurious Lehengas that capture Tradition & Beauty', align: 'left' },
-}
 
 const Home = () => {
   const { products, backendUrl } = useContext(ShopContext)
@@ -34,10 +24,8 @@ const Home = () => {
     fetchCategories()
   }, [backendUrl])
 
-  const hasCatalog = products.length > 0
-
   // Product sections: one per category the admin toggled "show on home",
-  // that actually has products. (The circles above show every category.)
+  // that actually has products. No demo fallback when the store is empty.
   const sections = categories
     .filter((c) => c.showOnHome === true)
     .map((c) => ({ name: c.name, items: products.filter((p) => p.category === c.name) }))
@@ -50,32 +38,12 @@ const Home = () => {
       <OfferBanner />
       <CategoryCircles />
 
-      {hasCatalog ? (
-        sections.map((g) => (
-          <section key={g.name}>
-            <SectionHeading title={g.name} />
-            <ProductCarousel items={g.items} />
-          </section>
-        ))
-      ) : (
-        // Empty catalog → show the demo showcase so the page still looks complete.
-        <>
-          {demoRows.map((row) => {
-            const promo = promos[row.title]
-            return (
-              <section key={row.title}>
-                <SectionHeading title={row.title} />
-                {promo && (
-                  <PromoBanner image={row.items[0].image[0]} title={promo.title} subtitle={promo.subtitle} align={promo.align} />
-                )}
-                <ProductCarousel kicker={row.kicker} items={row.items} />
-              </section>
-            )
-          })}
-          <SectionHeading title='Recommended For You' />
-          <ProductCarousel items={demoRecommended} />
-        </>
-      )}
+      {sections.map((g) => (
+        <section key={g.name}>
+          <SectionHeading title={g.name} />
+          <ProductCarousel items={g.items} />
+        </section>
+      ))}
     </div>
   )
 }

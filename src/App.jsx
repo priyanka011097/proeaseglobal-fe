@@ -5,6 +5,7 @@ import Collection from './pages/Collection'
 import About from './pages/About'
 import Contact from './pages/Contact'
 import Faq from './pages/Faq'
+import BulkOrder from './pages/BulkOrder'
 import Product from './pages/Product'
 import Cart from './pages/Cart'
 import Login from './pages/Login'
@@ -34,6 +35,7 @@ const App = () => {
           <Route path='/about' element={<About />} />
           <Route path='/contact' element={<Contact />} />
         <Route path='/faq' element={<Faq />} />
+        <Route path='/bulk-order' element={<BulkOrder />} />
           <Route path='/product/:productId' element={<Product />} />
           <Route path='/cart' element={<Cart />} />
           <Route path='/login' element={<Login />} />

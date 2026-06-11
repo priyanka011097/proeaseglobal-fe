@@ -3,15 +3,14 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { ShopContext } from '../context/ShopContext'
 
-// Primary navigation. Bulk Order Inquiry doesn't have a dedicated page
-// yet, so they point at the contact page for now.
+// Primary navigation.
 const navLinks = [
   { label: 'HOME', to: '/' },
   { label: 'ABOUT US', to: '/about' },
   { label: 'PRODUCTS', to: '/collection' },
   { label: 'CONTACT US', to: '/contact' },
   { label: 'FAQ', to: '/faq' },
-  { label: 'BULK ORDER INQUIRY', to: '/contact' },
+  { label: 'BULK ORDER INQUIRY', to: '/bulk-order' },
 ]
 
 // Built-in mark, used when no logo image has been uploaded in the admin.
@@ -77,7 +76,7 @@ const Navbar = () => {
   }
 
   const linkClass = ({ isActive }) =>
-    `px-4 py-2 rounded-lg text-[15px] tracking-wide whitespace-nowrap transition ${
+    `px-3 py-1.5 rounded-lg text-[13px] tracking-wide whitespace-nowrap transition ${
       isActive ? 'bg-[#F3DCBA] text-ink' : 'text-ink hover:text-[#4CAF2E]'
     }`
 
@@ -85,7 +84,7 @@ const Navbar = () => {
     <header className='bg-white sticky top-0 z-40'>
       {/* Top contact bar */}
       <div className='border-b border-[#efe4d3]'>
-        <div className='max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 flex items-center justify-end gap-8 py-2 text-sm text-ink'>
+        <div className='max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 flex items-center justify-end gap-8 py-1.5 text-xs text-ink'>
           <a href='mailto:info@proeaseglobal.com' className='flex items-center gap-2 hover:text-[#4CAF2E] transition'>
             <svg width='16' height='16' viewBox='0 0 24 24' fill='currentColor'><path d='M2 5.5A1.5 1.5 0 0 1 3.5 4h17A1.5 1.5 0 0 1 22 5.5v13A1.5 1.5 0 0 1 20.5 20h-17A1.5 1.5 0 0 1 2 18.5v-13Zm2.2.5 7.8 5.6L19.8 6H4.2ZM20 7.7l-7.4 5.3a1 1 0 0 1-1.2 0L4 7.7V18h16V7.7Z' /></svg>
             <span>info@proeaseglobal.com</span>
@@ -98,7 +97,7 @@ const Navbar = () => {
       </div>
 
       {/* Main bar: logo + menu */}
-      <div className='max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 flex items-center justify-between py-4 border-b border-[#efe4d3]'>
+      <div className='max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 flex items-center justify-between py-2 border-b border-[#efe4d3]'>
         <Logo branding={branding} />
 
         <nav className='hidden lg:flex items-center gap-2 xl:gap-4'>

@@ -62,7 +62,9 @@ const FooterLink = ({ url, children }) => {
 
 const Footer = () => {
   const { backendUrl } = useContext(ShopContext)
-  const [footer, setFooter] = useState(fallback)
+  // Start with an empty feature strip so it never flashes defaults before load
+  // and respects an admin who has removed all items.
+  const [footer, setFooter] = useState({ ...fallback, features: [] })
 
   useEffect(() => {
     const fetchFooter = async () => {
@@ -81,7 +83,9 @@ const Footer = () => {
   const col1 = links.slice(0, half)
   const col2 = links.slice(half)
 
-  const features = footer.features && footer.features.length > 0 ? footer.features : fallback.features
+  // Use exactly what the admin configured — no default fallback, so removing
+  // all items hides the strip entirely.
+  const features = Array.isArray(footer.features) ? footer.features : []
 
   return (
     <footer className='bg-white mt-16'>

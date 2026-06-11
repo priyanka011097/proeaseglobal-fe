@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '../context/ShopContext'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
-import { demoCategories } from '../assets/demo'
 import SectionHeading from './SectionHeading'
 
 const CategoryCircles = () => {
@@ -23,17 +22,15 @@ const CategoryCircles = () => {
 
   useEffect(() => { fetchCategories() }, [])
 
-  // With real categories, show each one with an image from one of its products.
-  // Only fall back to the demo showcase when there are no categories at all.
-  const usingReal = categories.length > 0
-  const items = usingReal ? categories : demoCategories
+  // Only show real categories — no demo fallback. Nothing configured → render nothing.
+  if (categories.length === 0) return null
+  const items = categories
 
   // Branded placeholder for a category that has no product image yet.
   const placeholder = (name) =>
     `https://placehold.co/400x400/F3E3D8/7B1530?text=${encodeURIComponent(name)}`
 
-  const imageFor = (item, i) => {
-    if (!usingReal) return item.image
+  const imageFor = (item) => {
     if (item.image) return item.image // admin-set category image, if ever added
     const product = products.find((p) => p.category === item.name && p.image && p.image[0])
     return product ? product.image[0] : placeholder(item.name)
@@ -42,7 +39,7 @@ const CategoryCircles = () => {
   return (
     <section className='py-10'>
       <SectionHeading title='Shop By Category' />
-      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6'>
+      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 sm:gap-6'>
         {items.map((item, i) => (
           <Link
             key={item._id || item.name}

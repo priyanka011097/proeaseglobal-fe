@@ -16,7 +16,8 @@ const fallback = {
 
 const OfferBanner = () => {
   const { backendUrl } = useContext(ShopContext)
-  const [offer, setOffer] = useState(fallback)
+  // Start empty so nothing renders until the real data is fetched (no flash).
+  const [offer, setOffer] = useState(null)
 
   useEffect(() => {
     const fetchOffer = async () => {
@@ -30,8 +31,8 @@ const OfferBanner = () => {
     fetchOffer()
   }, [backendUrl])
 
-  // Hidden when the admin turns it off.
-  if (offer.active === false) return null
+  // Hidden until loaded, and when the admin turns it off.
+  if (!offer || offer.active === false) return null
 
   return (
     <section className='relative bg-beige overflow-hidden w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]'>

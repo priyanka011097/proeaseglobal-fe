@@ -10,6 +10,8 @@ const fallback = {
   text2: "Since our beginning, we've curated a diverse selection of high-quality products, sourced from trusted makers, that cater to every taste and need.",
   missionTitle: 'Our Mission',
   missionText: 'Our mission is to empower customers with choice, convenience, and confidence.',
+  visionTitle: 'Our Vision',
+  visionText: '',
   points: [],
 }
 
@@ -40,6 +42,8 @@ const About = () => {
           {about.text2 && <p>{about.text2}</p>}
           {about.missionTitle && <b className='text-ink'>{about.missionTitle}</b>}
           {about.missionText && <p>{about.missionText}</p>}
+          {about.visionTitle && about.visionText && <b className='text-ink'>{about.visionTitle}</b>}
+          {about.visionText && <p>{about.visionText}</p>}
         </div>
       </div>
 
