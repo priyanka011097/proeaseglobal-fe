@@ -7,7 +7,13 @@ import RelatedProducts from '../components/RelatedProducts';
 const Product = () => {
 
   const { productId } = useParams();
-  const { products, currency ,addToCart } = useContext(ShopContext);
+  const { products, currency, addToCart, navigate } = useContext(ShopContext);
+
+  const handleAddToCart = () => {
+    if (!size) { addToCart(productData._id, size); return } // addToCart shows the "select size" toast
+    addToCart(productData._id, size)
+    navigate('/cart')
+  }
   const [productData, setProductData] = useState(false);
   const [image, setImage] = useState('')
   const [size,setSize] = useState('')
@@ -50,34 +56,50 @@ const Product = () => {
         {/* -------- Product Info ---------- */}
         <div className='flex-1'>
           <h1 className='font-medium text-2xl mt-2'>{productData.name}</h1>
+          {productData.description && <p className='mt-3 text-ink/70 leading-relaxed sm:w-4/5'>{productData.description}</p>}
           <p className='mt-5 text-3xl font-medium'>{currency}{productData.price}</p>
-          <p className='mt-5 text-gray-500 md:w-4/5'>{productData.description}</p>
           <div className='flex flex-col gap-4 my-8'>
               <p>Select Size</p>
-              <div className='flex gap-2'>
-                {productData.sizes.map((item,index)=>(
-                  <button onClick={()=>setSize(item)} className={`border py-2 px-4 bg-gray-100 ${item === size ? 'border-orange-500' : ''}`} key={index}>{item}</button>
-                ))}
+              <div className='flex gap-2 flex-wrap'>
+                {productData.sizes.map((item,index)=>{
+                  const s = (productData.stock || []).find((x) => x.size === item)
+                  const hasStockInfo = !!s
+                  const outOfStock = hasStockInfo && s.stock <= 0
+                  return (
+                    <button
+                      onClick={()=> !outOfStock && setSize(item)}
+                      disabled={outOfStock}
+                      className={`border py-2 px-4 bg-gray-100 ${item === size ? 'border-orange-500' : ''} ${outOfStock ? 'opacity-40 line-through cursor-not-allowed' : ''}`}
+                      key={index}
+                    >{item}</button>
+                  )
+                })}
               </div>
+              {size && (() => {
+                const s = (productData.stock || []).find((x) => x.size === size)
+                return s ? <p className='text-sm text-ink/60'>{s.stock > 0 ? `${s.stock} in stock` : 'Out of stock'}</p> : null
+              })()}
           </div>
-          <button onClick={()=>addToCart(productData._id,size)} className='bg-black text-white px-8 py-3 text-sm active:bg-gray-700'>ADD TO CART</button>
+          <button onClick={handleAddToCart} className='bg-black text-white px-8 py-3 text-sm active:bg-gray-700'>ADD TO CART</button>
           <hr className='mt-8 sm:w-4/5' />
-          <div className='text-sm text-gray-500 mt-5 flex flex-col gap-1'>
-              <p>100% Original product.</p>
-              <p>Cash on delivery is available on this product.</p>
-              <p>Easy return and exchange policy within 7 days.</p>
+          <div className='text-sm text-ink/70 mt-5 sm:w-4/5'>
+              <p className='font-medium text-ink mb-2'>Product Details</p>
+              {productData.details && productData.details.length > 0 ? (
+                <table className='w-full border border-cream'>
+                  <tbody>
+                    {productData.details.map((d, i) => (
+                      <tr key={i} className='border-b border-cream last:border-0'>
+                        <td className='py-2 px-3 bg-blush/50 font-medium text-ink w-1/2 align-top'>{d.label}</td>
+                        <td className='py-2 px-3'>{d.value}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p className='leading-relaxed whitespace-pre-line'>{productData.description}</p>
+              )}
+              {productData.sku && <p className='mt-3 text-ink/50'>SKU: {productData.sku}</p>}
           </div>
-        </div>
-      </div>
-
-      {/* ---------- Description Section ------------- */}
-      <div className='mt-20'>
-        <div className='flex'>
-          <b className='border px-5 py-3 text-sm'>Description</b>
-        </div>
-        <div className='flex flex-col gap-4 border px-6 py-6 text-sm text-gray-500'>
-          <p>An e-commerce website is an online platform that facilitates the buying and selling of products or services over the internet. It serves as a virtual marketplace where businesses and individuals can showcase their products, interact with customers, and conduct transactions without the need for a physical presence. E-commerce websites have gained immense popularity due to their convenience, accessibility, and the global reach they offer.</p>
-          <p>E-commerce websites typically display products or services along with detailed descriptions, images, prices, and any available variations (e.g., sizes, colors). Each product usually has its own dedicated page with relevant information.</p>
         </div>
       </div>
 
