@@ -17,6 +17,7 @@ const ShopContextProvider = (props) => {
     const [cartItems, setCartItems] = useState({});
     const [products, setProducts] = useState([]);
     const [token, setToken] = useState('')
+    const [seo, setSeo] = useState({ seoTitle: '', seoDescription: '', seoKeywords: '', seoImage: '', brandName: 'ProEase Global' });
     const navigate = useNavigate();
 
 
@@ -139,8 +140,27 @@ const ShopContextProvider = (props) => {
         }
     }
 
+    const getSeoData = async () => {
+        try {
+            const res = await axios.get(backendUrl + '/api/settings/get')
+            if (res.data.success && res.data.settings) {
+                const s = res.data.settings
+                setSeo({
+                    seoTitle: s.seoTitle || '',
+                    seoDescription: s.seoDescription || '',
+                    seoKeywords: s.seoKeywords || '',
+                    seoImage: s.seoImage || '',
+                    brandName: s.brandName || 'ProEase Global',
+                })
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     useEffect(() => {
         getProductsData()
+        getSeoData()
     }, [])
 
     useEffect(() => {
@@ -159,7 +179,7 @@ const ShopContextProvider = (props) => {
         cartItems, addToCart,setCartItems,
         getCartCount, updateQuantity,
         getCartAmount, navigate, backendUrl,
-        setToken, token
+        setToken, token, seo
     }
 
     return (

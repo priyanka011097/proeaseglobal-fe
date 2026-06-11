@@ -15,6 +15,7 @@ import Orders from './pages/Orders'
 import Navbar from './components/Navbar'
 import AnnouncementBar from './components/AnnouncementBar'
 import ThemeLoader from './components/ThemeLoader'
+import Seo from './components/Seo'
 import Footer from './components/Footer'
 import SearchBar from './components/SearchBar'
 import { ToastContainer, toast } from 'react-toastify';
@@ -25,6 +26,7 @@ const App = () => {
   return (
     <div className='overflow-x-hidden'>
       <ToastContainer />
+      <Seo />
       <ThemeLoader />
       <AnnouncementBar />
       <Navbar />

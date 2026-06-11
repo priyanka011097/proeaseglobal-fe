@@ -3,6 +3,7 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 import { ShopContext } from '../context/ShopContext'
 import SectionHeading from '../components/SectionHeading'
+import Seo from '../components/Seo'
 import { countries } from '../assets/countries'
 
 const PURPOSES = ['Reselling', 'Events', 'Personal', 'Corporate', 'Others']
@@ -56,6 +57,7 @@ const BulkOrder = () => {
 
   return (
     <div className='mb-24'>
+      <Seo title='Bulk Order Inquiry' />
       <SectionHeading title='Bulk Order Inquiry' />
       <p className='text-center text-ink/60 max-w-2xl mx-auto -mt-2 mb-8'>
         Looking to order in bulk? Fill in the details below and our team will get back to you with a custom quote.

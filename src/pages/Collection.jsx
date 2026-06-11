@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { assets } from '../assets/assets';
 import Title from '../components/Title';
 import ProductItem from '../components/ProductItem';
+import Seo from '../components/Seo';
 import axios from 'axios';
 
 const Collection = () => {
@@ -96,6 +97,7 @@ const Collection = () => {
 
   return (
     <div className='flex flex-col sm:flex-row gap-1 sm:gap-10 pt-10 border-t'>
+      <Seo title={category.length === 1 ? category[0] : 'Shop All Products'} />
 
       {/* Filter Options */}
       <div className='w-full sm:w-56 sm:shrink-0'>

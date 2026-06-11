@@ -3,6 +3,7 @@ import axios from 'axios'
 import { ShopContext } from '../context/ShopContext'
 import { assets } from '../assets/assets'
 import SectionHeading from '../components/SectionHeading'
+import Seo from '../components/Seo'
 
 const fallback = {
   image: '',
@@ -32,6 +33,7 @@ const Contact = () => {
 
   return (
     <div>
+      <Seo title='Contact Us' />
       <SectionHeading title='Contact Us' />
 
       <div className='my-10 flex flex-col justify-center md:flex-row gap-10 mb-28'>

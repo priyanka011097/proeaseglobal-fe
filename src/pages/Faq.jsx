@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import axios from 'axios'
 import { ShopContext } from '../context/ShopContext'
 import SectionHeading from '../components/SectionHeading'
+import Seo from '../components/Seo'
 
 const Faq = () => {
   const { backendUrl } = useContext(ShopContext)
@@ -22,6 +23,7 @@ const Faq = () => {
 
   return (
     <div className='mb-24'>
+      <Seo title='FAQ' />
       <SectionHeading title='Frequently Asked Questions' />
 
       <div className='max-w-3xl mx-auto mt-6 flex flex-col gap-3'>
