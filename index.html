@@ -3,6 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <!-- Set the favicon from the cached uploaded logo before paint, so a reload
+         doesn't flash the default favicon. -->
+    <script>
+      try {
+        var b = JSON.parse(localStorage.getItem('branding'));
+        if (b && b.logo) {
+          var l = document.querySelector("link[rel~='icon']") || document.createElement('link');
+          l.rel = 'icon';
+          l.href = b.logo;
+          document.head.appendChild(l);
+        }
+      } catch (e) {}
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#7B1530" />
 

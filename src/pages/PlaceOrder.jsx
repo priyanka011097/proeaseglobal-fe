@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Title from '../components/Title'
 import CartTotal from '../components/CartTotal'
 import { assets } from '../assets/assets'
@@ -6,10 +6,15 @@ import { ShopContext } from '../context/ShopContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 
+// TEMPORARY: online payment is off until Razorpay keys are configured.
+// Flip this to `true` (and add the Razorpay keys to backend/.env + frontend/.env)
+// to re-enable the Razorpay checkout popup.
+const ONLINE_PAYMENT = true
+
 const PlaceOrder = () => {
 
-    const [method, setMethod] = useState('cod');
-    const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products } = useContext(ShopContext);
+    const [method, setMethod] = useState(ONLINE_PAYMENT ? 'razorpay' : 'cod');
+    const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products, payCurrency, unitPrice } = useContext(ShopContext);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -21,6 +26,14 @@ const PlaceOrder = () => {
         country: '',
         phone: ''
     })
+
+    // Must be logged in to place an order.
+    useEffect(() => {
+        if (!token) {
+            toast.info('Please login to continue')
+            navigate('/login', { state: { redirect: '/place-order' } })
+        }
+    }, [token])
 
     const onChangeHandler = (event) => {
         const name = event.target.name
@@ -40,15 +53,22 @@ const PlaceOrder = () => {
             handler: async (response) => {
                 console.log(response)
                 try {
-                    
+
                     const { data } = await axios.post(backendUrl + '/api/order/verifyRazorpay',response,{headers:{token}})
                     if (data.success) {
                         navigate('/orders')
                         setCartItems({})
+                    } else {
+                        toast.error(data.message || 'Payment could not be verified')
                     }
                 } catch (error) {
                     console.log(error)
-                    toast.error(error)
+                    toast.error(error.message)
+                }
+            },
+            modal: {
+                ondismiss: () => {
+                    toast.info('Payment cancelled — your order was not placed')
                 }
             }
         }
@@ -69,6 +89,9 @@ const PlaceOrder = () => {
                         if (itemInfo) {
                             itemInfo.size = item
                             itemInfo.quantity = cartItems[items][item]
+                            // Record what was actually charged per unit, in the active currency.
+                            itemInfo.price = unitPrice(itemInfo)
+                            itemInfo.currency = payCurrency
                             orderItems.push(itemInfo)
                         }
                     }
@@ -78,13 +101,13 @@ const PlaceOrder = () => {
             let orderData = {
                 address: formData,
                 items: orderItems,
-                amount: getCartAmount() + delivery_fee
+                amount: getCartAmount() + delivery_fee,
+                currency: payCurrency
             }
             
 
             switch (method) {
 
-                // API Calls for COD
                 case 'cod':
                     const response = await axios.post(backendUrl + '/api/order/place',orderData,{headers:{token}})
                     if (response.data.success) {
@@ -110,6 +133,8 @@ const PlaceOrder = () => {
                     const responseRazorpay = await axios.post(backendUrl + '/api/order/razorpay', orderData, {headers:{token}})
                     if (responseRazorpay.data.success) {
                         initPay(responseRazorpay.data.order)
+                    } else {
+                        toast.error(responseRazorpay.data.message || 'Could not start payment')
                     }
 
                     break;
@@ -161,20 +186,18 @@ const PlaceOrder = () => {
                 <div className='mt-12'>
                     <Title text1={'PAYMENT'} text2={'METHOD'} />
                     {/* --------------- Payment Method Selection ------------- */}
-                    <div className='flex gap-3 flex-col lg:flex-row'>
-                        <div onClick={() => setMethod('stripe')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
-                            <p className={`min-w-3.5 h-3.5 border rounded-full ${method === 'stripe' ? 'bg-green-400' : ''}`}></p>
-                            <img className='h-5 mx-4' src={assets.stripe_logo} alt="" />
+                    {ONLINE_PAYMENT ? (
+                        <div className='flex gap-3 flex-col lg:flex-row'>
+                            <div onClick={() => setMethod('razorpay')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
+                                <p className={`min-w-3.5 h-3.5 border rounded-full ${method === 'razorpay' ? 'bg-green-400' : ''}`}></p>
+                                <img className='h-5 mx-4' src={assets.razorpay_logo} alt="" />
+                            </div>
                         </div>
-                        <div onClick={() => setMethod('razorpay')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
-                            <p className={`min-w-3.5 h-3.5 border rounded-full ${method === 'razorpay' ? 'bg-green-400' : ''}`}></p>
-                            <img className='h-5 mx-4' src={assets.razorpay_logo} alt="" />
-                        </div>
-                        <div onClick={() => setMethod('cod')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
-                            <p className={`min-w-3.5 h-3.5 border rounded-full ${method === 'cod' ? 'bg-green-400' : ''}`}></p>
-                            <p className='text-gray-500 text-sm font-medium mx-4'>CASH ON DELIVERY</p>
-                        </div>
-                    </div>
+                    ) : (
+                        <p className='text-sm text-ink/70 border border-cream bg-blush/30 rounded p-3'>
+                            Online payment is being set up. Place your order now and our team will reach out to confirm payment & delivery.
+                        </p>
+                    )}
 
                     <div className='w-full text-end mt-8'>
                         <button type='submit' className='bg-black text-white px-16 py-3 text-sm'>PLACE ORDER</button>

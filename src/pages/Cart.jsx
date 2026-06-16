@@ -3,10 +3,20 @@ import { ShopContext } from '../context/ShopContext'
 import Title from '../components/Title';
 import { assets } from '../assets/assets';
 import CartTotal from '../components/CartTotal';
+import { toast } from 'react-toastify';
 
 const Cart = () => {
 
-  const { products, currency, cartItems, updateQuantity, navigate } = useContext(ShopContext);
+  const { products, cartItems, updateQuantity, navigate, token, getPricing } = useContext(ShopContext);
+
+  const proceedToCheckout = () => {
+    if (!token) {
+      toast.info('Please login to continue')
+      navigate('/login', { state: { redirect: '/place-order' } })
+      return
+    }
+    navigate('/place-order')
+  }
 
   const [cartData, setCartData] = useState([]);
 
@@ -49,7 +59,7 @@ const Cart = () => {
                   <div>
                     <p className='text-xs sm:text-lg font-medium'>{productData.name}</p>
                     <div className='flex items-center gap-5 mt-2'>
-                      <p>{currency}{productData.price}</p>
+                      {(() => { const { symbol, final } = getPricing(productData); return <p>{symbol} {symbol === '$' ? final.toFixed(2) : Math.round(final)}</p> })()}
                       <p className='px-2 sm:px-3 sm:py-1 border bg-slate-50'>{item.size}</p>
                     </div>
                   </div>
@@ -67,7 +77,7 @@ const Cart = () => {
         <div className='w-full sm:w-[450px]'>
           <CartTotal />
           <div className=' w-full text-end'>
-            <button onClick={() => navigate('/place-order')} className='bg-black text-white text-sm my-8 px-8 py-3'>PROCEED TO CHECKOUT</button>
+            <button onClick={proceedToCheckout} className='bg-black text-white text-sm my-8 px-8 py-3'>PROCEED TO CHECKOUT</button>
           </div>
         </div>
       </div>

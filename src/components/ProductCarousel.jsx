@@ -27,14 +27,7 @@ const ProductCarousel = ({ kicker, items }) => {
       <div ref={scroller} className='no-scrollbar flex gap-4 overflow-x-auto scroll-smooth pb-2'>
         {items.map((item, index) => (
           <div key={item._id || index} className='shrink-0 w-40 sm:w-48'>
-            <ProductItem
-              id={item._id}
-              name={item.name}
-              image={item.image}
-              price={item.price}
-              oldPrice={item.oldPrice}
-              discount={item.discount}
-            />
+            <ProductItem product={item} />
           </div>
         ))}
       </div>

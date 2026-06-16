@@ -18,13 +18,23 @@ const fallback = {
 
 const About = () => {
   const { backendUrl } = useContext(ShopContext)
-  const [about, setAbout] = useState(fallback)
+  // Seed from cached About content so a reload shows the real image/text
+  // immediately instead of flashing the bundled demo image.
+  const [about, setAbout] = useState(() => {
+    try {
+      const cached = JSON.parse(localStorage.getItem('aboutPage'))
+      return cached ? { ...fallback, ...cached } : fallback
+    } catch { return fallback }
+  })
 
   useEffect(() => {
     const fetchPages = async () => {
       try {
         const res = await axios.get(backendUrl + '/api/pages/get')
-        if (res.data.success && res.data.pages?.about) setAbout({ ...fallback, ...res.data.pages.about })
+        if (res.data.success && res.data.pages?.about) {
+          setAbout({ ...fallback, ...res.data.pages.about })
+          localStorage.setItem('aboutPage', JSON.stringify(res.data.pages.about))
+        }
       } catch (error) {
         console.log(error)
       }

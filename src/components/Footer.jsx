@@ -24,6 +24,47 @@ const FeatureIcon = ({ name }) => (
   </svg>
 )
 
+// Filled brand glyphs for the social icons (24x24, fill=currentColor).
+const SOCIAL_ICONS = {
+  facebook: <path d='M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12Z' />,
+  instagram: <path d='M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.8.3 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.3 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.8-.3-2.2-.4a3.7 3.7 0 0 1-1.4-.9 3.7 3.7 0 0 1-.9-1.4c-.2-.4-.4-1-.4-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.9c.1-1.2.3-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4 1.3-.1 1.7-.1 4.9-.1Zm0 1.8c-3.1 0-3.5 0-4.7.1-1.1 0-1.7.2-2.1.4-.5.2-.9.4-1.3.8-.4.4-.6.8-.8 1.3-.2.4-.3 1-.4 2.1-.1 1.2-.1 1.6-.1 4.7s0 3.5.1 4.7c0 1.1.2 1.7.4 2.1.2.5.4.9.8 1.3.4.4.8.6 1.3.8.4.2 1 .3 2.1.4 1.2.1 1.6.1 4.7.1s3.5 0 4.7-.1c1.1 0 1.7-.2 2.1-.4.5-.2.9-.4 1.3-.8.4-.4.6-.8.8-1.3.2-.4.3-1 .4-2.1.1-1.2.1-1.6.1-4.7s0-3.5-.1-4.7c0-1.1-.2-1.7-.4-2.1a3.5 3.5 0 0 0-.8-1.3 3.5 3.5 0 0 0-1.3-.8c-.4-.2-1-.3-2.1-.4-1.2-.1-1.6-.1-4.7-.1Zm0 3.1a4.9 4.9 0 1 1 0 9.8 4.9 4.9 0 0 1 0-9.8Zm0 8.1a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Zm6.2-8.3a1.1 1.1 0 1 1-2.3 0 1.1 1.1 0 0 1 2.3 0Z' />,
+  linkedin: <path d='M20.5 2h-17A1.5 1.5 0 0 0 2 3.5v17A1.5 1.5 0 0 0 3.5 22h17a1.5 1.5 0 0 0 1.5-1.5v-17A1.5 1.5 0 0 0 20.5 2ZM8 19H5V9h3v10ZM6.5 7.7a1.8 1.8 0 1 1 0-3.6 1.8 1.8 0 0 1 0 3.6ZM19 19h-3v-5.3c0-1.3-.5-2.1-1.6-2.1-.9 0-1.4.6-1.6 1.2-.1.2-.1.5-.1.8V19h-3V9h3v1.3c.4-.7 1.2-1.6 2.9-1.6 2.1 0 3.7 1.4 3.7 4.3V19Z' />,
+  whatsapp: <path d='M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.5-.1-.7.1-.2.3-.7.9-.9 1.1-.2.2-.3.2-.6.1a7.7 7.7 0 0 1-2.3-1.4 8.6 8.6 0 0 1-1.6-2c-.2-.3 0-.4.1-.6l.4-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.3 5.1 4.6.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.4ZM12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.5A10 10 0 1 0 12 2Zm0 18.3a8.3 8.3 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.3 8.3 0 1 1 12 20.3Z' />,
+}
+
+const normalizeWhatsapp = (v) => {
+  if (!v) return ''
+  if (/^https?:/i.test(v)) return v
+  return `https://wa.me/${v.replace(/[^\d]/g, '')}`
+}
+
+const SocialIcons = ({ social }) => {
+  if (!social) return null
+  const items = [
+    { key: 'facebook', url: social.facebook },
+    { key: 'instagram', url: social.instagram },
+    { key: 'linkedin', url: social.linkedin },
+    { key: 'whatsapp', url: normalizeWhatsapp(social.whatsapp) },
+  ].filter((s) => s.url)
+  if (items.length === 0) return null
+  return (
+    <div className='flex items-center gap-3 mt-5'>
+      {items.map((s) => (
+        <a
+          key={s.key}
+          href={s.url}
+          target='_blank'
+          rel='noopener noreferrer'
+          aria-label={s.key}
+          className='w-9 h-9 flex items-center justify-center rounded-full bg-[#7B1530] text-white hover:bg-[#4CAF2E] transition'
+        >
+          <svg width='18' height='18' viewBox='0 0 24 24' fill='currentColor'>{SOCIAL_ICONS[s.key]}</svg>
+        </a>
+      ))}
+    </div>
+  )
+}
+
 // Content is editable from the admin panel (Footer). These act as a fallback
 // if the API is unavailable.
 const fallback = {
@@ -48,6 +89,7 @@ const fallback = {
   email: 'info@proeaseglobal.com',
   phone: '+91 91369 61528',
   hours: 'Mon – Sat, 10am – 7pm',
+  social: { facebook: '', instagram: '', linkedin: '', whatsapp: '' },
   copyright: '© 2026 Proease Global. All rights reserved.',
   tagline: 'Made with care.',
 }
@@ -130,6 +172,7 @@ const Footer = () => {
               {footer.phone && <li><a href={`tel:${footer.phone.replace(/\s/g, '')}`} className='hover:text-ink transition'>{footer.phone}</a></li>}
               {footer.hours && <li>{footer.hours}</li>}
             </ul>
+            <SocialIcons social={footer.social} />
           </div>
         </div>
 

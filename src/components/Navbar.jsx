@@ -52,15 +52,23 @@ const Logo = ({ branding }) => {
 
 const Navbar = () => {
   const [visible, setVisible] = useState(false)
-  const [branding, setBranding] = useState({ logo: '', brandName: 'PROEASEGLOBAL' })
+  // Seed from the last-known cached settings so a reload shows the real logo
+  // immediately instead of flashing the built-in default mark.
+  const [branding, setBranding] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('branding')) || { logo: '', brandName: 'PROEASEGLOBAL' } }
+    catch { return { logo: '', brandName: 'PROEASEGLOBAL' } }
+  })
   const navigate = useNavigate()
-  const { getCartCount, token, setToken, setCartItems, backendUrl } = useContext(ShopContext)
+  const { getCartCount, getWishlistCount, token, setToken, setCartItems, backendUrl, region, chooseRegion } = useContext(ShopContext)
 
   useEffect(() => {
     const fetchBranding = async () => {
       try {
         const res = await axios.get(backendUrl + '/api/settings/get')
-        if (res.data.success && res.data.settings) setBranding(res.data.settings)
+        if (res.data.success && res.data.settings) {
+          setBranding(res.data.settings)
+          localStorage.setItem('branding', JSON.stringify(res.data.settings))
+        }
       } catch (error) {
         console.log(error)
       }
@@ -108,6 +116,19 @@ const Navbar = () => {
           ))}
           {/* Account / login + cart */}
           <div className='flex items-center gap-4 ml-2'>
+            {/* Currency / region switch */}
+            <div className='flex items-center rounded-full border border-[#efe4d3] overflow-hidden text-[12px]'>
+              <button
+                onClick={() => chooseRegion('IN')}
+                className={`px-2 py-1 transition ${region === 'IN' ? 'bg-[#4CAF2E] text-white' : 'text-ink hover:bg-[#F3DCBA]'}`}
+                aria-label='Show prices in Indian Rupees'
+              >₹ INR</button>
+              <button
+                onClick={() => chooseRegion('INTL')}
+                className={`px-2 py-1 transition ${region !== 'IN' ? 'bg-[#4CAF2E] text-white' : 'text-ink hover:bg-[#F3DCBA]'}`}
+                aria-label='Show prices in US Dollars'
+              >$ USD</button>
+            </div>
             <div className='group relative'>
               <button onClick={() => { if (!token) navigate('/login') }} className='text-ink hover:text-[#4CAF2E] transition flex' aria-label={token ? 'My account' : 'Login'}>
                 <svg width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8'><circle cx='12' cy='8' r='4' /><path d='M4 21c0-4 4-6 8-6s8 2 8 6' strokeLinecap='round' /></svg>
@@ -121,6 +142,12 @@ const Navbar = () => {
                 </div>
               )}
             </div>
+            <Link to='/wishlist' className='relative text-ink hover:text-[#4CAF2E] transition' aria-label='Wishlist'>
+              <svg width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8'><path d='M12 21s-7.5-4.6-10-9.3C.6 8.5 2 5 5.3 5 7.3 5 8.9 6.2 12 9c3.1-2.8 4.7-4 6.7-4C22 5 23.4 8.5 22 11.7 19.5 16.4 12 21 12 21Z' strokeLinejoin='round' /></svg>
+              {getWishlistCount() > 0 && (
+                <span className='absolute -right-2 -top-2 min-w-4 h-4 px-1 flex items-center justify-center bg-[#4CAF2E] text-white rounded-full text-[10px] leading-none'>{getWishlistCount()}</span>
+              )}
+            </Link>
             <Link to='/cart' className='relative text-ink hover:text-[#4CAF2E] transition' aria-label='Cart'>
               <svg width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8'><circle cx='9' cy='20' r='1.6' /><circle cx='18' cy='20' r='1.6' /><path d='M2 3h3l2.2 12h11l2-8H6' strokeLinecap='round' strokeLinejoin='round' /></svg>
               {getCartCount() > 0 && (
@@ -149,6 +176,12 @@ const Navbar = () => {
               {l.label}
             </NavLink>
           ))}
+          <div className='flex items-center gap-2 py-3 px-6 border-b border-[#efe4d3]'>
+            <span className='text-sm'>Currency:</span>
+            <button onClick={() => chooseRegion('IN')} className={`px-3 py-1 rounded-full text-sm ${region === 'IN' ? 'bg-[#4CAF2E] text-white' : 'border border-[#efe4d3]'}`}>₹ INR</button>
+            <button onClick={() => chooseRegion('INTL')} className={`px-3 py-1 rounded-full text-sm ${region !== 'IN' ? 'bg-[#4CAF2E] text-white' : 'border border-[#efe4d3]'}`}>$ USD</button>
+          </div>
+          <NavLink onClick={() => setVisible(false)} className='py-3 px-6 border-b border-[#efe4d3]' to='/wishlist'>WISHLIST ({getWishlistCount()})</NavLink>
           <NavLink onClick={() => setVisible(false)} className='py-3 px-6 border-b border-[#efe4d3]' to='/cart'>CART ({getCartCount()})</NavLink>
           {token && <button onClick={() => { setVisible(false); logout() }} className='py-3 px-6 text-left text-[#4CAF2E]'>Logout</button>}
         </div>

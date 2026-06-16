@@ -9,7 +9,7 @@ import axios from 'axios';
 
 const Collection = () => {
 
-  const { products, search, showSearch, backendUrl, currency } = useContext(ShopContext);
+  const { products, search, showSearch, backendUrl, currency, unitPrice, region } = useContext(ShopContext);
   const [searchParams] = useSearchParams();
   const [showFilter, setShowFilter] = useState(false);
   const [filterProducts, setFilterProducts] = useState([]);
@@ -68,10 +68,10 @@ const Collection = () => {
       pc = pc.filter(item => fabricSel.includes(item.fabric))
     }
     if (minPrice !== '' && !isNaN(Number(minPrice))) {
-      pc = pc.filter(item => item.price >= Number(minPrice))
+      pc = pc.filter(item => unitPrice(item) >= Number(minPrice))
     }
     if (maxPrice !== '' && !isNaN(Number(maxPrice))) {
-      pc = pc.filter(item => item.price <= Number(maxPrice))
+      pc = pc.filter(item => unitPrice(item) <= Number(maxPrice))
     }
 
     setFilterProducts(pc)
@@ -80,13 +80,13 @@ const Collection = () => {
   const sortProduct = () => {
     let fpCopy = filterProducts.slice();
     switch (sortType) {
-      case 'low-high': setFilterProducts(fpCopy.sort((a, b) => (a.price - b.price))); break;
-      case 'high-low': setFilterProducts(fpCopy.sort((a, b) => (b.price - a.price))); break;
+      case 'low-high': setFilterProducts(fpCopy.sort((a, b) => (unitPrice(a) - unitPrice(b)))); break;
+      case 'high-low': setFilterProducts(fpCopy.sort((a, b) => (unitPrice(b) - unitPrice(a)))); break;
       default: applyFilter(); break;
     }
   }
 
-  useEffect(() => { applyFilter() }, [category, sizeSel, colorSel, fabricSel, minPrice, maxPrice, search, showSearch, products])
+  useEffect(() => { applyFilter() }, [category, sizeSel, colorSel, fabricSel, minPrice, maxPrice, search, showSearch, products, region])
   useEffect(() => { sortProduct() }, [sortType])
 
   const clearAll = () => {
@@ -194,7 +194,7 @@ const Collection = () => {
 
         <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6'>
           {filterProducts.map((item, index) => (
-            <ProductItem key={index} name={item.name} id={item._id} price={item.price} image={item.image} />
+            <ProductItem key={index} product={item} />
           ))}
         </div>
       </div>

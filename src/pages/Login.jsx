@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom';
 import { ShopContext } from '../context/ShopContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -8,6 +9,8 @@ const Login = () => {
 
   const [currentState, setCurrentState] = useState('Login');
   const { token, setToken, navigate, backendUrl } = useContext(ShopContext)
+  const location = useLocation()
+  const redirectTo = location.state?.redirect || '/'
 
   const googleEnabled = !!import.meta.env.VITE_GOOGLE_CLIENT_ID && !import.meta.env.VITE_GOOGLE_CLIENT_ID.startsWith('---')
 
@@ -64,7 +67,7 @@ const Login = () => {
 
   useEffect(()=>{
     if (token) {
-      navigate('/')
+      navigate(redirectTo)
     }
   },[token])
 

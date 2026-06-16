@@ -5,7 +5,8 @@ import axios from 'axios';
 
 const Orders = () => {
 
-  const { backendUrl, token , currency} = useContext(ShopContext);
+  const { backendUrl, token } = useContext(ShopContext);
+  const sym = (c) => c === 'USD' ? '$ ' : '₹ ';
 
   const [orderData,setorderData] = useState([])
 
@@ -24,6 +25,7 @@ const Orders = () => {
             item['payment'] = order.payment
             item['paymentMethod'] = order.paymentMethod
             item['date'] = order.date
+            item['orderCurrency'] = item.currency || order.currency || 'INR'
             allOrdersItem.push(item)
           })
         })
@@ -55,7 +57,7 @@ const Orders = () => {
                         <div>
                           <p className='sm:text-base font-medium'>{item.name}</p>
                           <div className='flex items-center gap-3 mt-1 text-base text-gray-700'>
-                            <p>{currency}{item.price}</p>
+                            <p>{sym(item.orderCurrency)}{item.price}</p>
                             <p>Quantity: {item.quantity}</p>
                             <p>Size: {item.size}</p>
                           </div>
