@@ -10,6 +10,7 @@ import LegalPage from './components/LegalPage'
 import Product from './pages/Product'
 import Cart from './pages/Cart'
 import Wishlist from './pages/Wishlist'
+import Invoice from './pages/Invoice'
 import Login from './pages/Login'
 import PlaceOrder from './pages/PlaceOrder'
 import Orders from './pages/Orders'
@@ -19,6 +20,7 @@ import ThemeLoader from './components/ThemeLoader'
 import Seo from './components/Seo'
 import Footer from './components/Footer'
 import FloatingWhatsApp from './components/FloatingWhatsApp'
+import LoginNudge from './components/LoginNudge'
 import SearchBar from './components/SearchBar'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -49,11 +51,13 @@ const App = () => {
           <Route path='/login' element={<Login />} />
           <Route path='/place-order' element={<PlaceOrder />} />
           <Route path='/orders' element={<Orders />} />
+          <Route path='/invoice/:orderId' element={<Invoice />} />
           <Route path='/verify' element={<Verify />} />
         </Routes>
       </main>
       <Footer />
       <FloatingWhatsApp />
+      <LoginNudge />
     </div>
   )
 }

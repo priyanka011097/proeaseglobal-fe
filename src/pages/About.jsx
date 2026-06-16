@@ -7,6 +7,7 @@ import Seo from '../components/Seo'
 
 const fallback = {
   image: '',
+  logo: '',
   text1: 'ProEase Global was born out of a passion for quality and craftsmanship — bringing premium, thoughtfully made products to homes and businesses everywhere.',
   text2: "Since our beginning, we've curated a diverse selection of high-quality products, sourced from trusted makers, that cater to every taste and need.",
   missionTitle: 'Our Mission',
@@ -50,6 +51,7 @@ const About = () => {
       <div className='my-10 flex flex-col md:flex-row gap-16'>
         <img className='w-full md:max-w-[450px] rounded-sm object-cover' src={about.image || assets.about_img} alt='' />
         <div className='flex flex-col justify-center gap-6 md:w-2/4 text-ink/70'>
+          {about.logo && <img src={about.logo} alt='' className='h-28 w-auto object-contain self-start mb-2' />}
           {about.text1 && <p>{about.text1}</p>}
           {about.text2 && <p>{about.text2}</p>}
           {about.missionTitle && <b className='text-ink'>{about.missionTitle}</b>}

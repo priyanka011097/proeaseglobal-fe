@@ -5,7 +5,7 @@ import axios from 'axios';
 
 const Orders = () => {
 
-  const { backendUrl, token } = useContext(ShopContext);
+  const { backendUrl, token, navigate } = useContext(ShopContext);
   const sym = (c) => c === 'USD' ? '$ ' : '₹ ';
 
   const [orderData,setorderData] = useState([])
@@ -26,6 +26,7 @@ const Orders = () => {
             item['paymentMethod'] = order.paymentMethod
             item['date'] = order.date
             item['orderCurrency'] = item.currency || order.currency || 'INR'
+            item['orderId'] = order._id
             allOrdersItem.push(item)
           })
         })
@@ -70,7 +71,10 @@ const Orders = () => {
                             <p className='min-w-2 h-2 rounded-full bg-green-500'></p>
                             <p className='text-sm md:text-base'>{item.status}</p>
                         </div>
-                        <button onClick={loadOrderData} className='border px-4 py-2 text-sm font-medium rounded-sm'>Track Order</button>
+                        <div className='flex gap-2'>
+                          <button onClick={() => navigate(`/invoice/${item.orderId}`)} className='border px-4 py-2 text-sm font-medium rounded-sm'>Invoice</button>
+                          <button onClick={loadOrderData} className='border px-4 py-2 text-sm font-medium rounded-sm'>Track Order</button>
+                        </div>
                     </div>
                 </div>
               ))
