@@ -1,11 +1,33 @@
 import React, { useContext, useEffect, useState } from 'react'
+import axios from 'axios'
+import { toast } from 'react-toastify'
+import { GoogleLogin } from '@react-oauth/google'
 import { ShopContext } from '../context/ShopContext'
+
+const googleEnabled = !!import.meta.env.VITE_GOOGLE_CLIENT_ID && !import.meta.env.VITE_GOOGLE_CLIENT_ID.startsWith('---')
 
 // Gently nudges logged-out visitors to sign in. Appears once per session a few
 // seconds after landing; the visitor can dismiss it.
 const LoginNudge = () => {
-  const { token, navigate } = useContext(ShopContext)
+  const { token, navigate, backendUrl, setToken } = useContext(ShopContext)
   const [open, setOpen] = useState(false)
+
+  const handleGoogle = async (credentialResponse) => {
+    try {
+      const res = await axios.post(backendUrl + '/api/user/google', { credential: credentialResponse.credential })
+      if (res.data.success) {
+        setToken(res.data.token)
+        localStorage.setItem('token', res.data.token)
+        setOpen(false)
+        sessionStorage.setItem('loginNudgeDismissed', '1')
+      } else {
+        toast.error(res.data.message)
+      }
+    } catch (error) {
+      console.log(error)
+      toast.error(error.message)
+    }
+  }
 
   useEffect(() => {
     if (token) return                                   // already logged in
@@ -51,6 +73,23 @@ const LoginNudge = () => {
         <button onClick={goLogin} className='w-full py-3 bg-maroon text-white rounded-sm text-sm font-medium hover:opacity-90 transition'>
           Login / Sign Up
         </button>
+
+        {googleEnabled && (
+          <>
+            <div className='flex items-center gap-3 w-full my-3 text-ink/40 text-xs'>
+              <span className='flex-1 h-px bg-cream' /> or <span className='flex-1 h-px bg-cream' />
+            </div>
+            <div className='flex justify-center'>
+              <GoogleLogin
+                onSuccess={handleGoogle}
+                onError={() => toast.error('Google sign-in failed')}
+                text='continue_with'
+                shape='rectangular'
+              />
+            </div>
+          </>
+        )}
+
         <button onClick={dismiss} className='mt-3 text-sm text-ink/50 hover:text-ink'>
           Maybe later
         </button>

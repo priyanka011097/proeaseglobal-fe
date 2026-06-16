@@ -6,14 +6,9 @@ import { ShopContext } from '../context/ShopContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 
-// TEMPORARY: online payment is off until Razorpay keys are configured.
-// Flip this to `true` (and add the Razorpay keys to backend/.env + frontend/.env)
-// to re-enable the Razorpay checkout popup.
-const ONLINE_PAYMENT = true
-
 const PlaceOrder = () => {
 
-    const [method, setMethod] = useState(ONLINE_PAYMENT ? 'razorpay' : 'cod');
+    const [method, setMethod] = useState('razorpay');
     const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products, payCurrency, unitPrice } = useContext(ShopContext);
     const [formData, setFormData] = useState({
         firstName: '',
@@ -108,16 +103,6 @@ const PlaceOrder = () => {
 
             switch (method) {
 
-                case 'cod':
-                    const response = await axios.post(backendUrl + '/api/order/place',orderData,{headers:{token}})
-                    if (response.data.success) {
-                        setCartItems({})
-                        navigate('/orders')
-                    } else {
-                        toast.error(response.data.message)
-                    }
-                    break;
-
                 case 'stripe':
                     const responseStripe = await axios.post(backendUrl + '/api/order/stripe',orderData,{headers:{token}})
                     if (responseStripe.data.success) {
@@ -186,18 +171,12 @@ const PlaceOrder = () => {
                 <div className='mt-12'>
                     <Title text1={'PAYMENT'} text2={'METHOD'} />
                     {/* --------------- Payment Method Selection ------------- */}
-                    {ONLINE_PAYMENT ? (
-                        <div className='flex gap-3 flex-col lg:flex-row'>
-                            <div onClick={() => setMethod('razorpay')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
-                                <p className={`min-w-3.5 h-3.5 border rounded-full ${method === 'razorpay' ? 'bg-green-400' : ''}`}></p>
-                                <img className='h-5 mx-4' src={assets.razorpay_logo} alt="" />
-                            </div>
+                    <div className='flex gap-3 flex-col lg:flex-row'>
+                        <div onClick={() => setMethod('razorpay')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
+                            <p className={`min-w-3.5 h-3.5 border rounded-full ${method === 'razorpay' ? 'bg-green-400' : ''}`}></p>
+                            <img className='h-5 mx-4' src={assets.razorpay_logo} alt="" />
                         </div>
-                    ) : (
-                        <p className='text-sm text-ink/70 border border-cream bg-blush/30 rounded p-3'>
-                            Online payment is being set up. Place your order now and our team will reach out to confirm payment & delivery.
-                        </p>
-                    )}
+                    </div>
 
                     <div className='w-full text-end mt-8'>
                         <button type='submit' className='bg-black text-white px-16 py-3 text-sm'>PLACE ORDER</button>
