@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://proeaseglobal-fe.vercel.app/sitemap.xml
+Sitemap: https://proeaseglobal.com/sitemap.xml

@@ -57,6 +57,7 @@ const ShopContextProvider = (props) => {
     const [search, setSearch] = useState('');
     const [showSearch, setShowSearch] = useState(false);
     const [cartItems, setCartItems] = useState({});
+    const [promo, setPromo] = useState(null);   // { code, type, value } once applied
     const [wishlist, setWishlist] = useState(() => {
         try { return JSON.parse(localStorage.getItem('wishlist')) || [] } catch { return [] }
     });
@@ -169,6 +170,56 @@ const ShopContextProvider = (props) => {
         // Round to a clean value in the active currency.
         return isIN ? Math.round(totalAmount) : Math.round(totalAmount * 100) / 100;
     }
+
+    // Cart subtotal expressed in INR (used to validate promo min-order in INR).
+    const getCartAmountInr = () => {
+        let total = 0
+        for (const id in cartItems) {
+            const p = products.find((x) => x._id === id)
+            if (!p) continue
+            const unitInr = Number(p.abroadPrice && !isIN ? p.abroadPrice : p.price) || 0
+            for (const size in cartItems[id]) total += unitInr * (cartItems[id][size] || 0)
+        }
+        return Math.round(total)
+    }
+
+    // Discount in the ACTIVE currency, recomputed from the current subtotal.
+    const getDiscount = () => {
+        if (!promo) return 0
+        const sub = getCartAmount()
+        let d = 0
+        if (promo.type === 'percent') d = sub * (Number(promo.value) || 0) / 100
+        else d = isIN ? Number(promo.value) || 0 : toUSD(Number(promo.value) || 0)   // flat value stored in INR
+        d = Math.min(d, sub)
+        return isIN ? Math.round(d) : Math.round(d * 100) / 100
+    }
+
+    // Total the customer pays, after discount.
+    const getFinalAmount = () => {
+        const t = getCartAmount() - getDiscount()
+        const v = t < 0 ? 0 : t
+        return isIN ? Math.round(v) : Math.round(v * 100) / 100
+    }
+
+    const applyPromo = async (code) => {
+        const clean = (code || '').trim()
+        if (!clean) { toast.error('Enter a promo code'); return }
+        try {
+            const res = await axios.post(backendUrl + '/api/promo/validate', { code: clean, subtotalInr: getCartAmountInr() })
+            if (res.data.success) {
+                setPromo({ code: res.data.code, type: res.data.type, value: res.data.value })
+                toast.success(`Code ${res.data.code} applied`)
+            } else {
+                setPromo(null)
+                toast.error(res.data.message)
+            }
+        } catch (error) {
+            console.log(error)
+            toast.error('Could not apply code')
+        }
+    }
+
+    const removePromo = () => setPromo(null)
 
     const getProductsData = async () => {
         try {
@@ -300,7 +351,8 @@ const ShopContextProvider = (props) => {
         getCartAmount, navigate, backendUrl,
         setToken, token, seo,
         wishlist, toggleWishlist, isInWishlist, getWishlistCount,
-        region, isIN, chooseRegion, usdRate, unitPrice, getPricing, fmt, payCurrency
+        region, isIN, chooseRegion, usdRate, unitPrice, getPricing, fmt, payCurrency,
+        promo, applyPromo, removePromo, getDiscount, getFinalAmount
     }
 
     return (

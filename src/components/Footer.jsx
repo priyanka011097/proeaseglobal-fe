@@ -107,12 +107,22 @@ const Footer = () => {
   // Start with an empty feature strip so it never flashes defaults before load
   // and respects an admin who has removed all items.
   const [footer, setFooter] = useState({ ...fallback, features: [] })
+  // Logo from branding settings (seed from cache to avoid a flash).
+  const [logo, setLogo] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('branding'))?.logo || '' } catch { return '' }
+  })
 
   useEffect(() => {
     const fetchFooter = async () => {
       try {
         const res = await axios.get(backendUrl + '/api/footer/get')
         if (res.data.success && res.data.footer) setFooter(res.data.footer)
+      } catch (error) {
+        console.log(error)
+      }
+      try {
+        const s = await axios.get(backendUrl + '/api/settings/get')
+        if (s.data.success && s.data.settings?.logo) setLogo(s.data.settings.logo)
       } catch (error) {
         console.log(error)
       }
@@ -149,6 +159,7 @@ const Footer = () => {
           <div>
             <h3 className='text-xl tracking-[0.18em] text-ink'>{footer.brandName}</h3>
             <p className='mt-4 text-ink/70 text-sm leading-relaxed max-w-xs'>{footer.description}</p>
+            {logo && <img src={logo} alt={footer.brandName || 'Logo'} className='mt-5 h-16 w-auto object-contain' />}
           </div>
 
           {/* Quick links (two sub-columns) */}

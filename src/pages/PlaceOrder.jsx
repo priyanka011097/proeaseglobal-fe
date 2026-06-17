@@ -9,7 +9,7 @@ import { toast } from 'react-toastify'
 const PlaceOrder = () => {
 
     const [method, setMethod] = useState('razorpay');
-    const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products, payCurrency, unitPrice } = useContext(ShopContext);
+    const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products, payCurrency, unitPrice, promo, getDiscount, getFinalAmount } = useContext(ShopContext);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -96,8 +96,10 @@ const PlaceOrder = () => {
             let orderData = {
                 address: formData,
                 items: orderItems,
-                amount: getCartAmount() + delivery_fee,
-                currency: payCurrency
+                amount: getFinalAmount() + delivery_fee,
+                currency: payCurrency,
+                promoCode: promo?.code || '',
+                discount: getDiscount()
             }
             
 
