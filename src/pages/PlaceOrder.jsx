@@ -9,7 +9,7 @@ import { toast } from 'react-toastify'
 const PlaceOrder = () => {
 
     const [method, setMethod] = useState('razorpay');
-    const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products, payCurrency, unitPrice, promo, getDiscount, getFinalAmount } = useContext(ShopContext);
+    const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, products, payCurrency, unitPrice, promo, getDiscount, getFinalAmount, shipping, setShipping, isIN, toUSD } = useContext(ShopContext);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -29,6 +29,35 @@ const PlaceOrder = () => {
             navigate('/login', { state: { redirect: '/place-order' } })
         }
     }, [token])
+
+    // Calculate shipping from Shiprocket once the destination pincode is entered.
+    useEffect(() => {
+        let cancelled = false
+        const quote = async () => {
+            const units = Object.values(cartItems).reduce(
+                (s, sizes) => s + Object.values(sizes).reduce((a, q) => a + (q || 0), 0), 0)
+            if (units === 0) { setShipping(0); return }
+            const weight = Math.max(0.3, units * 0.3)   // ~0.3 kg per item
+
+            if (!isIN) {
+                // International: Shiprocket domestic rates don't apply — use a flat estimate.
+                setShipping(toUSD(1500))
+                return
+            }
+            const pin = (formData.zipcode || '').toString().trim()
+            if (pin.length < 6) { setShipping(0); return }
+            try {
+                const res = await axios.post(backendUrl + '/api/order/shipping-rate', { pincode: pin, weight })
+                if (cancelled) return
+                const rate = res.data?.rate
+                setShipping(rate != null ? rate : 99)   // fallback flat ₹99 if unserviceable
+            } catch (e) {
+                if (!cancelled) setShipping(99)
+            }
+        }
+        quote()
+        return () => { cancelled = true }
+    }, [formData.zipcode, formData.country, cartItems, isIN])
 
     const onChangeHandler = (event) => {
         const name = event.target.name
@@ -96,7 +125,7 @@ const PlaceOrder = () => {
             let orderData = {
                 address: formData,
                 items: orderItems,
-                amount: getFinalAmount() + delivery_fee,
+                amount: getFinalAmount() + shipping,
                 currency: payCurrency,
                 promoCode: promo?.code || '',
                 discount: getDiscount()
@@ -119,7 +148,14 @@ const PlaceOrder = () => {
 
                     const responseRazorpay = await axios.post(backendUrl + '/api/order/razorpay', orderData, {headers:{token}})
                     if (responseRazorpay.data.success) {
-                        initPay(responseRazorpay.data.order)
+                        if (responseRazorpay.data.free) {
+                            // 100%-off / free order — no payment needed.
+                            setCartItems({})
+                            toast.success('Order placed')
+                            navigate('/orders')
+                        } else {
+                            initPay(responseRazorpay.data.order)
+                        }
                     } else {
                         toast.error(responseRazorpay.data.message || 'Could not start payment')
                     }

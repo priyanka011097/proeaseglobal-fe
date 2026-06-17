@@ -58,6 +58,7 @@ const ShopContextProvider = (props) => {
     const [showSearch, setShowSearch] = useState(false);
     const [cartItems, setCartItems] = useState({});
     const [promo, setPromo] = useState(null);   // { code, type, value } once applied
+    const [shipping, setShipping] = useState(0); // shipping charge in the ACTIVE currency
     const [wishlist, setWishlist] = useState(() => {
         try { return JSON.parse(localStorage.getItem('wishlist')) || [] } catch { return [] }
     });
@@ -351,8 +352,9 @@ const ShopContextProvider = (props) => {
         getCartAmount, navigate, backendUrl,
         setToken, token, seo,
         wishlist, toggleWishlist, isInWishlist, getWishlistCount,
-        region, isIN, chooseRegion, usdRate, unitPrice, getPricing, fmt, payCurrency,
-        promo, applyPromo, removePromo, getDiscount, getFinalAmount
+        region, isIN, chooseRegion, usdRate, unitPrice, getPricing, fmt, payCurrency, toUSD,
+        promo, applyPromo, removePromo, getDiscount, getFinalAmount,
+        shipping, setShipping
     }
 
     return (

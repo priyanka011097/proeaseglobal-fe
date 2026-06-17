@@ -4,7 +4,7 @@ import Title from './Title';
 
 const CartTotal = () => {
 
-    const { delivery_fee, getCartAmount, fmt, promo, applyPromo, removePromo, getDiscount, getFinalAmount } = useContext(ShopContext);
+    const { getCartAmount, fmt, promo, applyPromo, removePromo, getDiscount, getFinalAmount, shipping } = useContext(ShopContext);
     const [code, setCode] = useState('')
 
     const discount = getDiscount()
@@ -20,15 +20,6 @@ const CartTotal = () => {
                 <p>Subtotal</p>
                 <p>{fmt(getCartAmount())}</p>
             </div>
-            {delivery_fee > 0 && (
-              <>
-                <hr />
-                <div className='flex justify-between'>
-                    <p>Shipping Fee</p>
-                    <p>{fmt(delivery_fee)}</p>
-                </div>
-              </>
-            )}
             {discount > 0 && (
               <>
                 <hr />
@@ -40,8 +31,13 @@ const CartTotal = () => {
             )}
             <hr />
             <div className='flex justify-between'>
+                <p>Shipping</p>
+                <p>{shipping > 0 ? fmt(shipping) : <span className='text-ink/50'>Enter pincode at checkout</span>}</p>
+            </div>
+            <hr />
+            <div className='flex justify-between'>
                 <b>Total</b>
-                <b>{fmt(getCartAmount() === 0 ? 0 : getFinalAmount() + delivery_fee)}</b>
+                <b>{fmt(getCartAmount() === 0 ? 0 : getFinalAmount() + shipping)}</b>
             </div>
       </div>
 
