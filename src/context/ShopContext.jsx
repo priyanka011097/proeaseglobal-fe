@@ -36,8 +36,8 @@ const ShopContextProvider = (props) => {
             return { symbol: '₹', final, original: orig > final ? orig : null }
         }
         const finalInr = Number(product.abroadPrice || product.price || 0)
-        const origInr = Number(product.originalPrice || 0)
-        return { symbol: '$', final: toUSD(finalInr), original: origInr > finalInr ? toUSD(origInr) : null }
+        // No discount shown in USD — international prices display flat, with no struck-through MRP.
+        return { symbol: '$', final: toUSD(finalInr), original: null }
     }
 
     // Format a number in the active currency (₹ = integer, $ = 2 decimals).

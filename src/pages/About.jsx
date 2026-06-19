@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import axios from 'axios'
 import { ShopContext } from '../context/ShopContext'
-import { assets } from '../assets/assets'
 import SectionHeading from '../components/SectionHeading'
 import Seo from '../components/Seo'
 
@@ -49,7 +48,11 @@ const About = () => {
       <SectionHeading title='About Us' />
 
       <div className='my-10 flex flex-col md:flex-row gap-16'>
-        <img className='w-full md:max-w-[450px] rounded-sm object-cover' src={about.image || assets.about_img} alt='' />
+        {about.image ? (
+          <img className='w-full md:max-w-[450px] rounded-sm object-cover' src={about.image} alt='' />
+        ) : (
+          <div className='w-full md:max-w-[450px] aspect-[3/4] rounded-sm bg-cream animate-pulse' />
+        )}
         <div className='flex flex-col justify-center gap-6 md:w-2/4 text-ink/70'>
           {about.logo && <img src={about.logo} alt='' className='h-28 w-auto object-contain self-start mb-2' />}
           {about.text1 && <p>{about.text1}</p>}
