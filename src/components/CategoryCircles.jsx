@@ -36,26 +36,37 @@ const CategoryCircles = () => {
     return product ? product.image[0] : placeholder(item.name)
   }
 
+  // Always lay the categories out in 2 rows. The smaller half goes on top,
+  // the larger half on the bottom (e.g. 7 categories → 3 then 4).
+  const firstRowCount = Math.floor(items.length / 2)
+  const rows = [items.slice(0, firstRowCount), items.slice(firstRowCount)]
+
+  const renderCard = (item, i) => (
+    <Link
+      key={item._id || item.name}
+      onClick={() => scrollTo(0, 0)}
+      to={`/collection?category=${encodeURIComponent(item.name)}`}
+      className='group flex flex-col items-center gap-3 w-[140px] sm:w-[170px] md:w-[200px]'
+    >
+      <div className='relative w-full aspect-[3/4] rounded-lg overflow-hidden ring-1 ring-beige shadow-sm bg-cream'>
+        <img
+          src={imageFor(item, i)}
+          alt={item.name}
+          className='w-full h-full object-cover group-hover:scale-105 transition duration-500'
+        />
+      </div>
+      <span className='text-sm sm:text-base text-ink font-medium text-center'>{item.name}</span>
+    </Link>
+  )
+
   return (
     <section className='py-10'>
       <SectionHeading title='Shop By Category' />
-      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 sm:gap-6'>
-        {items.map((item, i) => (
-          <Link
-            key={item._id || item.name}
-            onClick={() => scrollTo(0, 0)}
-            to={`/collection?category=${encodeURIComponent(item.name)}`}
-            className='group flex flex-col items-center gap-3'
-          >
-            <div className='relative w-full aspect-[3/4] rounded-lg overflow-hidden ring-1 ring-beige shadow-sm bg-cream'>
-              <img
-                src={imageFor(item, i)}
-                alt={item.name}
-                className='w-full h-full object-cover group-hover:scale-105 transition duration-500'
-              />
-            </div>
-            <span className='text-sm sm:text-base text-ink font-medium text-center'>{item.name}</span>
-          </Link>
+      <div className='flex flex-col gap-4 sm:gap-6'>
+        {rows.map((row, rowIndex) => (
+          <div key={rowIndex} className='flex flex-wrap justify-center gap-4 sm:gap-6'>
+            {row.map((item, i) => renderCard(item, rowIndex * firstRowCount + i))}
+          </div>
         ))}
       </div>
     </section>
