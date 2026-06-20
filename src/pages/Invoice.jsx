@@ -5,7 +5,7 @@ import { ShopContext } from '../context/ShopContext'
 
 const SELLER = {
   name: 'ProEase Global',
-  line1: 'Rajkot, Gujarat, India',
+  line1: 'Mumbai, Maharashtra, India',
   email: 'info@proeaseglobal.com',
   phone: '+91 91369 61528',
 }
