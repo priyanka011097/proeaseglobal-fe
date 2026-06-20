@@ -63,7 +63,9 @@ const ShopContextProvider = (props) => {
         try { return JSON.parse(localStorage.getItem('wishlist')) || [] } catch { return [] }
     });
     const [products, setProducts] = useState([]);
-    const [token, setToken] = useState('')
+    // Seed from localStorage so the token is present on the first render — avoids
+    // login-guarded pages (e.g. checkout) wrongly bouncing logged-in users on reload.
+    const [token, setToken] = useState(() => localStorage.getItem('token') || '')
     const [seo, setSeo] = useState({ seoTitle: '', seoDescription: '', seoKeywords: '', seoImage: '', brandName: 'ProEase Global' });
     const navigate = useNavigate();
 

@@ -65,9 +65,9 @@ const PlaceOrder = () => {
         setFormData(data => ({ ...data, [name]: value }))
     }
 
-    const initPay = (order) => {
+    const initPay = (order, key) => {
         const options = {
-            key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+            key: key || import.meta.env.VITE_RAZORPAY_KEY_ID,
             amount: order.amount,
             currency: order.currency,
             name:'Order Payment',
@@ -154,7 +154,7 @@ const PlaceOrder = () => {
                             toast.success('Order placed')
                             navigate('/orders')
                         } else {
-                            initPay(responseRazorpay.data.order)
+                            initPay(responseRazorpay.data.order, responseRazorpay.data.key)
                         }
                     } else {
                         toast.error(responseRazorpay.data.message || 'Could not start payment')
