@@ -29,9 +29,12 @@ const DefaultMark = ({ brandName }) => (
 
 const Logo = ({ branding }) => {
   const {
-    logo, brandName, logoPosition = 'left', logoHeight = 56,
+    logo, headerLogo, brandName, logoPosition = 'left', logoHeight = 56,
     logoWidth = 0, logoFit = 'contain', logoPosX = 50, logoPosY = 50,
   } = branding || {}
+
+  // Header uses its own logo when set, otherwise the site-wide logo.
+  const headerSrc = headerLogo || logo
 
   const margin = logoPosition === 'center' ? 'mx-auto' : logoPosition === 'right' ? 'ml-auto' : ''
   const imgStyle = {
@@ -43,8 +46,8 @@ const Logo = ({ branding }) => {
 
   return (
     <Link to='/' className={`flex flex-col items-center leading-none select-none ${margin}`}>
-      {logo
-        ? <img src={logo} alt={brandName || 'Logo'} style={imgStyle} />
+      {headerSrc
+        ? <img src={headerSrc} alt={brandName || 'Logo'} style={imgStyle} />
         : <DefaultMark brandName={brandName} />}
     </Link>
   )
