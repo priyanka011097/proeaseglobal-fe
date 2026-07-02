@@ -8,7 +8,7 @@ import SizeChart from '../components/SizeChart';
 const Product = () => {
 
   const { productId } = useParams();
-  const { products, addToCart, navigate, isInWishlist, toggleWishlist, getPricing } = useContext(ShopContext);
+  const { products, addToCart, navigate, isInWishlist, toggleWishlist, getPricing, setViewingCatalog } = useContext(ShopContext);
 
   const handleAddToCart = () => {
     if (!size) { addToCart(productData._id, size); return } // addToCart shows the "select size" toast
@@ -26,6 +26,8 @@ const Product = () => {
       if (item._id === productId) {
         setProductData(item)
         setImage(item.image[0])
+        // Tell the app which catalog we're in so the navbar + branding follow it.
+        setViewingCatalog(item.catalog || 'Apparels')
         return null;
       }
     })
@@ -136,7 +138,7 @@ const Product = () => {
 
       {/* --------- display related products ---------- */}
 
-      <RelatedProducts category={productData.category} subCategory={productData.subCategory} />
+      <RelatedProducts category={productData.category} catalog={productData.catalog} />
 
     </div>
   ) : <div className=' opacity-0'></div>

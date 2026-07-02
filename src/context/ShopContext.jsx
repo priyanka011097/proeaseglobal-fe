@@ -1,6 +1,6 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from 'axios'
 
 export const ShopContext = createContext();
@@ -36,8 +36,9 @@ const ShopContextProvider = (props) => {
             return { symbol: '₹', final, original: orig > final ? orig : null }
         }
         const finalInr = Number(product.abroadPrice || product.price || 0)
-        // No discount shown in USD — international prices display flat, with no struck-through MRP.
-        return { symbol: '$', final: toUSD(finalInr), original: null }
+        // Struck-through MRP for USD only when an Original Abroad Price is set (optional).
+        const origAbroadInr = Number(product.originalAbroadPrice || 0)
+        return { symbol: '$', final: toUSD(finalInr), original: origAbroadInr > finalInr ? toUSD(origAbroadInr) : null }
     }
 
     // Format a number in the active currency (₹ = integer, $ = 2 decimals).
@@ -63,11 +64,27 @@ const ShopContextProvider = (props) => {
         try { return JSON.parse(localStorage.getItem('wishlist')) || [] } catch { return [] }
     });
     const [products, setProducts] = useState([]);
+    const [catalogs, setCatalogs] = useState([]);   // active storefront verticals
     // Seed from localStorage so the token is present on the first render — avoids
     // login-guarded pages (e.g. checkout) wrongly bouncing logged-in users on reload.
     const [token, setToken] = useState(() => localStorage.getItem('token') || '')
     const [seo, setSeo] = useState({ seoTitle: '', seoDescription: '', seoKeywords: '', seoImage: '', brandName: 'ProEase Global' });
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Which catalog the shopper is currently browsing. Comes from a /catalog/:slug
+    // URL, or from a page that declares it (e.g. a product page sets its product's
+    // catalog). Empty on neutral pages (cart, about, …) → global chrome is used.
+    const [viewingCatalog, setViewingCatalog] = useState('')
+    const routeCatalog = useMemo(() => {
+        const m = location.pathname.match(/^\/catalog\/([^/]+)/)
+        if (!m) return ''
+        return catalogs.find((c) => c.slug === m[1])?.name || ''
+    }, [location.pathname, catalogs])
+    const currentCatalog = routeCatalog || viewingCatalog
+
+    // Reset any page-declared catalog when the route changes; the new page re-sets it.
+    useEffect(() => { setViewingCatalog('') }, [location.pathname])
 
 
     const addToCart = async (itemId, size) => {
@@ -116,6 +133,18 @@ const ShopContextProvider = (props) => {
     }
 
     const isInWishlist = (itemId) => wishlist.includes(itemId)
+
+    // Drop wishlisted IDs whose product no longer exists (deleted/stale), so the
+    // heart badge count always matches what the Wishlist page can actually show.
+    useEffect(() => {
+        if (products.length === 0) return
+        setWishlist((prev) => {
+            const valid = prev.filter((id) => products.some((p) => p._id === id))
+            if (valid.length === prev.length) return prev
+            localStorage.setItem('wishlist', JSON.stringify(valid))
+            return valid
+        })
+    }, [products])
 
     const getWishlistCount = () => wishlist.length
 
@@ -276,9 +305,9 @@ const ShopContextProvider = (props) => {
         }
     }
 
-    const getSeoData = async () => {
+    const getSeoData = async (catalog = '') => {
         try {
-            const res = await axios.get(backendUrl + '/api/settings/get')
+            const res = await axios.get(backendUrl + '/api/settings/get', { params: catalog ? { catalog } : {} })
             if (res.data.success && res.data.settings) {
                 const s = res.data.settings
                 setSeo({
@@ -329,12 +358,25 @@ const ShopContextProvider = (props) => {
         }
     }
 
+    const getCatalogs = async () => {
+        try {
+            const res = await axios.get(backendUrl + '/api/catalog/list')
+            if (res.data.success) setCatalogs((res.data.catalogs || []).filter((c) => c.active !== false))
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     useEffect(() => {
         getProductsData()
         getSeoData()
+        getCatalogs()
         detectRegion()
         loadRate()
     }, [])
+
+    // Re-load SEO/meta for the catalog being browsed (falls back to global).
+    useEffect(() => { getSeoData(currentCatalog) }, [currentCatalog])
 
     useEffect(() => {
         if (!token && localStorage.getItem('token')) {
@@ -347,7 +389,7 @@ const ShopContextProvider = (props) => {
     }, [token])
 
     const value = {
-        products, currency, delivery_fee,
+        products, catalogs, currentCatalog, setViewingCatalog, currency, delivery_fee,
         search, setSearch, showSearch, setShowSearch,
         cartItems, addToCart,setCartItems,
         getCartCount, updateQuantity,

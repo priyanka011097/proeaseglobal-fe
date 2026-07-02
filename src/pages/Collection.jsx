@@ -9,7 +9,7 @@ import axios from 'axios';
 
 const Collection = () => {
 
-  const { products, search, showSearch, backendUrl, currency, unitPrice, region } = useContext(ShopContext);
+  const { products, search, showSearch, backendUrl, currency, unitPrice, region, catalogs } = useContext(ShopContext);
   const [searchParams] = useSearchParams();
   const [showFilter, setShowFilter] = useState(false);
   const [filterProducts, setFilterProducts] = useState([]);
@@ -22,26 +22,35 @@ const Collection = () => {
   const [sortType, setSortType] = useState('relavent')
   const [categoryOptions, setCategoryOptions] = useState([]);
 
+  // Catalog scope from the URL (?catalog=Apparels); defaults to the first catalog
+  // so the collection never mixes products from different catalogs.
+  const catalogParam = searchParams.get('catalog') || catalogs[0]?.name || ''
+
   const fetchCategories = async () => {
     try {
-      const response = await axios.get(backendUrl + '/api/category/list')
+      const response = await axios.get(backendUrl + '/api/category/list', { params: catalogParam ? { catalog: catalogParam } : {} })
       if (response.data.success) setCategoryOptions(response.data.categories)
     } catch (error) {
       console.log(error)
     }
   }
 
-  useEffect(() => { fetchCategories() }, [])
+  useEffect(() => { fetchCategories() }, [catalogParam])
 
   useEffect(() => {
     const initial = searchParams.get('category')
-    if (initial) setCategory([initial])
+    setCategory(initial ? [initial] : [])
   }, [searchParams])
 
-  // Distinct filter options derived from the catalogue.
-  const sizeOptions = useMemo(() => [...new Set(products.flatMap(p => p.sizes || []))].filter(Boolean).sort(), [products])
-  const colorOptions = useMemo(() => [...new Set(products.map(p => p.color).filter(Boolean))].sort(), [products])
-  const fabricOptions = useMemo(() => [...new Set(products.map(p => p.fabric).filter(Boolean))].sort(), [products])
+  // Products limited to the active catalog (all products when no catalog set).
+  const scopedProducts = useMemo(
+    () => catalogParam ? products.filter(p => (p.catalog || 'Apparels') === catalogParam) : products,
+    [products, catalogParam])
+
+  // Distinct filter options derived from the (catalog-scoped) catalogue.
+  const sizeOptions = useMemo(() => [...new Set(scopedProducts.flatMap(p => p.sizes || []))].filter(Boolean).sort(), [scopedProducts])
+  const colorOptions = useMemo(() => [...new Set(scopedProducts.map(p => p.color).filter(Boolean))].sort(), [scopedProducts])
+  const fabricOptions = useMemo(() => [...new Set(scopedProducts.map(p => p.fabric).filter(Boolean))].sort(), [scopedProducts])
 
   // Generic checkbox toggler.
   const toggle = (setter) => (e) => {
@@ -50,7 +59,7 @@ const Collection = () => {
   }
 
   const applyFilter = () => {
-    let pc = products.slice();
+    let pc = scopedProducts.slice();
 
     if (showSearch && search) {
       pc = pc.filter(item => item.name.toLowerCase().includes(search.toLowerCase()))
@@ -86,7 +95,7 @@ const Collection = () => {
     }
   }
 
-  useEffect(() => { applyFilter() }, [category, sizeSel, colorSel, fabricSel, minPrice, maxPrice, search, showSearch, products, region])
+  useEffect(() => { applyFilter() }, [category, sizeSel, colorSel, fabricSel, minPrice, maxPrice, search, showSearch, scopedProducts, region])
   useEffect(() => { sortProduct() }, [sortType])
 
   const clearAll = () => {

@@ -3,7 +3,7 @@ import { ShopContext } from '../context/ShopContext'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
-const Hero = () => {
+const Hero = ({ catalog }) => {
   const { backendUrl } = useContext(ShopContext)
   const navigate = useNavigate()
   const [banners, setBanners] = useState([])
@@ -11,14 +11,14 @@ const Hero = () => {
 
   const fetchBanners = async () => {
     try {
-      const response = await axios.get(backendUrl + '/api/banner/list')
+      const response = await axios.get(backendUrl + '/api/banner/list', { params: catalog ? { catalog } : {} })
       if (response.data.success) setBanners(response.data.banners)
     } catch (error) {
       console.log(error)
     }
   }
 
-  useEffect(() => { fetchBanners() }, [])
+  useEffect(() => { fetchBanners() }, [catalog])
 
   // Only show banners the admin has actually added — no demo fallback.
   const slides = banners

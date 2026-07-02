@@ -4,15 +4,15 @@ import { Link } from 'react-router-dom'
 import axios from 'axios'
 import SectionHeading from './SectionHeading'
 
-const CategoryCircles = () => {
+const CategoryCircles = ({ catalog }) => {
   const { backendUrl, products } = useContext(ShopContext)
   const [categories, setCategories] = useState([])
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get(backendUrl + '/api/category/list')
+      const response = await axios.get(backendUrl + '/api/category/list', { params: catalog ? { catalog } : {} })
       if (response.data.success) {
-        // "Shop By Category" shows every category that exists.
+        // "Shop By Category" shows every category in this catalog.
         setCategories(response.data.categories)
       }
     } catch (error) {
@@ -20,7 +20,7 @@ const CategoryCircles = () => {
     }
   }
 
-  useEffect(() => { fetchCategories() }, [])
+  useEffect(() => { fetchCategories() }, [catalog])
 
   // Only show real categories — no demo fallback. Nothing configured → render nothing.
   if (categories.length === 0) return null
@@ -32,7 +32,7 @@ const CategoryCircles = () => {
 
   const imageFor = (item) => {
     if (item.image) return item.image // admin-set category image, if ever added
-    const product = products.find((p) => p.category === item.name && p.image && p.image[0])
+    const product = products.find((p) => p.category === item.name && (!catalog || (p.catalog || 'Apparels') === catalog) && p.image && p.image[0])
     return product ? product.image[0] : placeholder(item.name)
   }
 
@@ -45,7 +45,7 @@ const CategoryCircles = () => {
     <Link
       key={item._id || item.name}
       onClick={() => scrollTo(0, 0)}
-      to={`/collection?category=${encodeURIComponent(item.name)}`}
+      to={`/collection?${catalog ? `catalog=${encodeURIComponent(catalog)}&` : ''}category=${encodeURIComponent(item.name)}`}
       className='group flex flex-col items-center gap-3 w-[140px] sm:w-[170px] md:w-[200px]'
     >
       <div className='relative w-full aspect-[3/4] rounded-lg overflow-hidden ring-1 ring-beige shadow-sm bg-cream'>

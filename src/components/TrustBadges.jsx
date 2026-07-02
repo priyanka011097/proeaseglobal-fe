@@ -33,7 +33,7 @@ const fallback = {
   active: true,
 }
 
-const TrustBadges = () => {
+const TrustBadges = ({ catalog }) => {
   const { backendUrl } = useContext(ShopContext)
   // Start empty so nothing renders until the real data is fetched (no flash).
   const [trust, setTrust] = useState(null)
@@ -41,14 +41,14 @@ const TrustBadges = () => {
   useEffect(() => {
     const fetchTrust = async () => {
       try {
-        const res = await axios.get(backendUrl + '/api/trust/get')
+        const res = await axios.get(backendUrl + '/api/trust/get', { params: catalog ? { catalog } : {} })
         if (res.data.success && res.data.trust) setTrust(res.data.trust)
       } catch (error) {
         console.log(error)
       }
     }
     fetchTrust()
-  }, [backendUrl])
+  }, [backendUrl, catalog])
 
   if (!trust || trust.active === false) return null
 

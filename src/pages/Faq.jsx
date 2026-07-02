@@ -5,21 +5,24 @@ import SectionHeading from '../components/SectionHeading'
 import Seo from '../components/Seo'
 
 const Faq = () => {
-  const { backendUrl } = useContext(ShopContext)
+  const { backendUrl, catalogs } = useContext(ShopContext)
   const [items, setItems] = useState([])
   const [open, setOpen] = useState(0)
+
+  // /faq is a global page, so it shows the default (first) catalog's FAQ.
+  const defaultCatalog = catalogs[0]?.name || ''
 
   useEffect(() => {
     const fetchFaq = async () => {
       try {
-        const res = await axios.get(backendUrl + '/api/faq/get')
+        const res = await axios.get(backendUrl + '/api/faq/get', { params: defaultCatalog ? { catalog: defaultCatalog } : {} })
         if (res.data.success && res.data.faq?.items) setItems(res.data.faq.items)
       } catch (error) {
         console.log(error)
       }
     }
     fetchFaq()
-  }, [backendUrl])
+  }, [backendUrl, defaultCatalog])
 
   return (
     <div className='mb-24'>

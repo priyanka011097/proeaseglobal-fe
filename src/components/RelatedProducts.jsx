@@ -3,7 +3,7 @@ import { ShopContext } from '../context/ShopContext'
 import Title from './Title';
 import ProductItem from './ProductItem';
 
-const RelatedProducts = ({category,subCategory}) => {
+const RelatedProducts = ({category, catalog}) => {
 
     const { products } = useContext(ShopContext);
     const [related,setRelated] = useState([]);
@@ -11,16 +11,17 @@ const RelatedProducts = ({category,subCategory}) => {
     useEffect(()=>{
 
         if (products.length > 0) {
-            
+
             let productsCopy = products.slice();
-            
+
+            // Related = same category (and same catalog when known).
             productsCopy = productsCopy.filter((item) => category === item.category);
-            productsCopy = productsCopy.filter((item) => subCategory === item.subCategory);
+            if (catalog) productsCopy = productsCopy.filter((item) => (item.catalog || 'Apparels') === catalog);
 
             setRelated(productsCopy.slice(0,5));
         }
-        
-    },[products])
+
+    },[products, category, catalog])
 
   return (
     <div className='my-24'>

@@ -4,7 +4,7 @@ import axios from 'axios'
 import { ShopContext } from '../context/ShopContext'
 
 const AnnouncementBar = () => {
-  const { backendUrl } = useContext(ShopContext)
+  const { backendUrl, currentCatalog } = useContext(ShopContext)
   const navigate = useNavigate()
   const [data, setData] = useState({ text: '', active: false, link: '' })
   const [dismissed, setDismissed] = useState(false)
@@ -12,7 +12,7 @@ const AnnouncementBar = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await axios.get(backendUrl + '/api/settings/get')
+        const res = await axios.get(backendUrl + '/api/settings/get', { params: currentCatalog ? { catalog: currentCatalog } : {} })
         if (res.data.success && res.data.settings) {
           const s = res.data.settings
           const text = s.announcementText || ''
@@ -23,7 +23,7 @@ const AnnouncementBar = () => {
       }
     }
     fetchSettings()
-  }, [backendUrl])
+  }, [backendUrl, currentCatalog])
 
   if (!data.active || !data.text || dismissed) return null
 

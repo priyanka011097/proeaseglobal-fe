@@ -14,7 +14,7 @@ const fallback = {
   active: true,
 }
 
-const OfferBanner = () => {
+const OfferBanner = ({ catalog }) => {
   const { backendUrl } = useContext(ShopContext)
   // Start empty so nothing renders until the real data is fetched (no flash).
   const [offer, setOffer] = useState(null)
@@ -22,14 +22,14 @@ const OfferBanner = () => {
   useEffect(() => {
     const fetchOffer = async () => {
       try {
-        const res = await axios.get(backendUrl + '/api/offer/get')
+        const res = await axios.get(backendUrl + '/api/offer/get', { params: catalog ? { catalog } : {} })
         if (res.data.success && res.data.offer) setOffer(res.data.offer)
       } catch (error) {
         console.log(error)
       }
     }
     fetchOffer()
-  }, [backendUrl])
+  }, [backendUrl, catalog])
 
   // Hidden until loaded, and when the admin turns it off.
   if (!offer || offer.active === false) return null

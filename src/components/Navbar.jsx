@@ -1,17 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import axios from 'axios'
 import { ShopContext } from '../context/ShopContext'
-
-// Primary navigation.
-const navLinks = [
-  { label: 'HOME', to: '/' },
-  { label: 'ABOUT US', to: '/about' },
-  { label: 'PRODUCTS', to: '/collection' },
-  { label: 'CONTACT US', to: '/contact' },
-  { label: 'FAQ', to: '/faq' },
-  { label: 'BULK ORDER INQUIRY', to: '/bulk-order' },
-]
 
 // Built-in mark, used when no logo image has been uploaded in the admin.
 const DefaultMark = ({ brandName }) => (
@@ -62,22 +52,47 @@ const Navbar = () => {
     catch { return { logo: '', brandName: 'PROEASEGLOBAL' } }
   })
   const navigate = useNavigate()
-  const { getCartCount, getWishlistCount, token, setToken, setCartItems, backendUrl, region, chooseRegion } = useContext(ShopContext)
+  const { getCartCount, getWishlistCount, token, setToken, setCartItems, backendUrl, region, chooseRegion, catalogs, currentCatalog } = useContext(ShopContext)
+
+  // Info pages live in the main bar; catalogs get their own strip above it.
+  const navLinks = [
+    { label: 'HOME', to: '/' },
+    { label: 'ABOUT US', to: '/about' },
+    { label: 'CONTACT US', to: '/contact' },
+    { label: 'FAQ', to: '/faq' },
+    { label: 'BULK ORDER INQUIRY', to: '/bulk-order' },
+  ]
+
+  const location = useLocation()
+  // The catalog being viewed, for highlighting the catalog bar:
+  //  - /catalog/:slug  → that catalog (via currentCatalog)
+  //  - /collection      → its ?catalog (or the default)
+  //  - /                → the default (first) catalog
+  const collectionCatalog = location.pathname === '/collection'
+    ? (new URLSearchParams(location.search).get('catalog') || catalogs[0]?.name || '')
+    : ''
+  const activeCatalogName = currentCatalog || collectionCatalog || (location.pathname === '/' ? (catalogs[0]?.name || '') : '')
+
+  const catalogLinkClass = (active) =>
+    `px-4 py-2.5 text-[13px] tracking-[0.08em] uppercase whitespace-nowrap transition border-b-2 ${
+      active ? 'text-[#7B1530] font-semibold border-[#7B1530]' : 'text-ink/80 border-transparent hover:text-[#4CAF2E]'
+    }`
 
   useEffect(() => {
     const fetchBranding = async () => {
       try {
-        const res = await axios.get(backendUrl + '/api/settings/get')
+        const res = await axios.get(backendUrl + '/api/settings/get', { params: currentCatalog ? { catalog: currentCatalog } : {} })
         if (res.data.success && res.data.settings) {
           setBranding(res.data.settings)
-          localStorage.setItem('branding', JSON.stringify(res.data.settings))
+          // Only cache the global branding for first-paint (avoids caching a catalog-specific logo site-wide).
+          if (!currentCatalog) localStorage.setItem('branding', JSON.stringify(res.data.settings))
         }
       } catch (error) {
         console.log(error)
       }
     }
     fetchBranding()
-  }, [backendUrl])
+  }, [backendUrl, currentCatalog])
 
   const logout = () => {
     navigate('/login')
@@ -106,6 +121,19 @@ const Navbar = () => {
           </a>
         </div>
       </div>
+
+      {/* Catalog bar: top-level verticals (Apparels | Jewellery | Spices) */}
+      {catalogs && catalogs.length > 0 && (
+        <div className='border-b border-[#efe4d3] bg-white'>
+          <div className='max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 flex items-center justify-center gap-1 sm:gap-3 overflow-x-auto'>
+            {catalogs.map((c) => (
+              <NavLink key={c._id} to={`/catalog/${c.slug}`} className={catalogLinkClass(c.name === activeCatalogName)}>
+                {c.name}
+              </NavLink>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Main bar: logo + menu */}
       <div className='max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 flex items-center justify-between py-2 border-b border-[#efe4d3]'>
@@ -173,6 +201,12 @@ const Navbar = () => {
           <button onClick={() => setVisible(false)} className='text-3xl text-ink' aria-label='Close menu'>×</button>
         </div>
         <div className='flex flex-col text-ink'>
+          {catalogs && catalogs.length > 0 && catalogs.map((c) => (
+            <NavLink key={c._id} onClick={() => setVisible(false)}
+              className={`py-3 px-6 border-b border-[#efe4d3] uppercase tracking-wide font-medium ${c.name === activeCatalogName ? 'bg-[#F3DCBA] text-[#7B1530]' : 'text-[#7B1530]'}`} to={`/catalog/${c.slug}`}>
+              {c.name}
+            </NavLink>
+          ))}
           {navLinks.map((l) => (
             <NavLink key={l.label} onClick={() => setVisible(false)} end={l.to === '/'}
               className={({ isActive }) => `py-3 px-6 border-b border-[#efe4d3] ${isActive ? 'bg-[#F3DCBA]' : ''}`} to={l.to}>
